@@ -2,13 +2,39 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的文本页面</title>
-    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的笔记本</title>
+    <link rel="stylesheet" href="./static/css/style.css">
 </head>
 <body>
-    <h1>我的在线文本库</h1>
-    <div id="text-box"></div>
+    <!-- 汉堡菜单按钮 -->
+    <div class="menu-btn" id="menuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
 
-    <script src="./script.js"></script>
+    <!-- 侧边导航栏 -->
+    <nav class="side-menu" id="sideMenu">
+        <h3>我的菜单</h3>
+        <ul>
+            <li><a href="./index.html">🏠 首页笔记</a></li>
+            <li><a href="./pages/about-note.html">ℹ️ 关于笔记</a></li>
+        </ul>
+        <hr>
+        <h4>我的笔记列表</h4>
+        <div id="note-list"></div>
+    </nav>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main-content">
+        <h1>我的在线笔记本</h1>
+        <div id="text-box" class="text-box">
+            点击左侧菜单，选择笔记查看内容~
+        </div>
+    </main>
+
+    <script src="./static/js/script.js"></script>
 </body>
 </html>
