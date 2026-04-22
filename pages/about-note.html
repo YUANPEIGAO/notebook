@@ -7,34 +7,32 @@
     <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body>
+    <!-- 汉堡菜单按钮 -->
     <div class="menu-btn" id="menuBtn">
         <span></span>
         <span></span>
         <span></span>
     </div>
 
+    <!-- 侧边导航栏 -->
     <nav class="side-menu" id="sideMenu">
         <h3>我的菜单</h3>
         <ul>
             <li><a href="../index.html">🏠 首页笔记</a></li>
             <li><a href="./about-note.html">ℹ️ 关于笔记</a></li>
         </ul>
+        <hr>
+        <h4>我的笔记列表</h4>
+        <div id="note-list"></div>
     </nav>
 
     <div class="overlay" id="overlay"></div>
 
     <main class="main-content">
-        <h1>关于我的笔记库</h1>
+        <h1>关于笔记</h1>
         <div class="text-box">
-这是个人轻量化笔记系统
-
-结构说明：
-1. 首页：浏览、读取 note 文件夹内所有 txt
-2. 笔记统一存放：/note 文件夹
-3. 样式与脚本统一存放：/static
-4. 额外页面统一存放：/pages
-
-干净整洁、方便长期收纳文本、日记、资料。
+            这是一个简单的在线笔记网站<br>
+            支持：查看笔记、菜单切换、响应式布局
         </div>
     </main>
 
