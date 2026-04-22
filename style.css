@@ -1,0 +1,22 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 微软雅黑;
+    background: #f0f2f5;
+}
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+#text-box {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
