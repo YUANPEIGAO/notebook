@@ -494,6 +494,16 @@ async function syncCurrentNote() {
         return;
     }
 
+    if (!currentNote.title || !currentNote.title.trim()) {
+        showToast('笔记标题不能为空', 'error');
+        return;
+    }
+
+    if (!currentNote.content || !currentNote.content.trim()) {
+        showToast('笔记内容不能为空', 'error');
+        return;
+    }
+
     try {
         const noteData = {
             id: currentNote.id,
@@ -540,7 +550,20 @@ async function syncToGitHub() {
     }
 
     try {
+        let syncedCount = 0;
+        let skippedCount = 0;
         for (const note of unsyncedNotes) {
+            if (!note.title || !note.title.trim()) {
+                console.log(`跳过笔记 ${note.id}: 标题为空`);
+                skippedCount++;
+                continue;
+            }
+            if (!note.content || !note.content.trim()) {
+                console.log(`跳过笔记 ${note.id}: 内容为空`);
+                skippedCount++;
+                continue;
+            }
+
             const noteId = note.id;
             const noteData = {
                 id: note.id,
@@ -557,11 +580,16 @@ async function syncToGitHub() {
             );
 
             Storage.markAsSynced(note.id, 'synced');
+            syncedCount++;
         }
 
         renderNoteList();
         updateStats();
-        showToast(`成功同步 ${unsyncedNotes.length} 篇笔记`);
+        let message = `成功同步 ${syncedCount} 篇笔记`;
+        if (skippedCount > 0) {
+            message += `，跳过 ${skippedCount} 篇空笔记`;
+        }
+        showToast(message);
     } catch (error) {
         showToast('同步失败：' + error.message, 'error');
     } finally {
