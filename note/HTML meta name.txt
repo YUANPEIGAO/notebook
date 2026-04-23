@@ -1,0 +1,21 @@
+meta name 核心总结（含使用实例）
+定义：<meta name="...">是 HTML 中用于定义网页元数据的标签，仅可放置在<head>标签内，为 “名 / 值对” 形式，对用户不可见，主要供浏览器、搜索引擎、爬虫读取解析。
+基本语法：<meta name="元数据名称" content="对应的值">，其中name指定元数据名称，content为元数据对应的具体内容 / 值。
+常用 name 取值、作用及使用实例
+SEO 核心：description（页面简短描述，作为搜索引擎结果摘要），实例：<meta name="description" content="前端学习平台，提供HTML/CSS/JS零基础到进阶全套教程">；keywords（页面关键词，英文逗号分隔，现代 SEO 权重低），实例：<meta name="keywords" content="前端开发,HTML,JavaScript,CSS">；robots（控制爬虫索引与链接跟踪），实例：<meta name="robots" content="index,follow">、<meta name="robots" content="noindex,nofollow">。
+基础信息：author（标注页面作者），实例：<meta name="author" content="前端开发团队">；generator（标注建站工具 / 框架），实例：<meta name="generator" content="VuePress 2.0">；application-name（标注 Web 应用名称），实例：<meta name="application-name" content="在线代码编辑器">。
+移动端适配：viewport（视口设置，移动端响应式开发必备），实例：<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">。
+其他实用：color-scheme（支持网页深色 / 浅色模式自适应），实例：<meta name="color-scheme" content="light dark">；referrer（控制页面跳转时 Referer 信息传递），实例：<meta name="referrer" content="no-referrer">。
+常用完整组合实例：网页头部基础元数据配置，直接复制可用
+html
+预览
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="个人技术博客，分享前端开发实战与学习心得">
+  <meta name="keywords" content="前端,React,Vue,实战开发">
+  <meta name="author" content="小明">
+  <meta name="robots" content="index,follow">
+  <title>小明的前端博客</title>
+</head>
+重要注意事项：①该标签仅能在<head>内使用，<body>内配置无效；②一个<meta>标签仅能使用name、http-equiv、charset、itemprop其中一种属性，不可同时搭配；③keywords对现代 SEO 影响极小，无需过度堆砌，description为核心配置，直接影响搜索引擎结果的点击率。
