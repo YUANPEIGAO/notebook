@@ -121,7 +121,11 @@ const GitHub = {
         }
 
         const data = await response.json();
-        return decodeURIComponent(escape(atob(data.content)));
+        try {
+            return decodeURIComponent(escape(atob(data.content)));
+        } catch (e) {
+            throw new Error('解码文件内容失败');
+        }
     },
 
     async listFiles(path = '') {

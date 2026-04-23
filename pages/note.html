@@ -36,6 +36,7 @@
         <div class="menu-nav">
             <a href="../index.html" class="nav-link">🏠 功能首页</a>
             <a href="./note.html" class="nav-link active">📝 笔记管理</a>
+            <a href="./tools.html" class="nav-link">🛠️ 工具箱</a>
         </div>
         <hr class="menu-divider">
         <div class="action-buttons">
@@ -46,6 +47,14 @@
             <button id="btn-open-settings" class="btn btn-text">⚙️ 设置</button>
         </div>
         <hr class="menu-divider">
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 搜索笔记...">
+            <div class="search-actions">
+                <button id="btn-search-local" class="btn btn-text btn-search btn-search-active">本地</button>
+                <button id="btn-search-cloud" class="btn btn-text btn-search">云端</button>
+            </div>
+        </div>
+        <div id="search-results" class="search-results" style="display: none;"></div>
         <h4>笔记列表</h4>
         <div id="note-list" class="note-list"></div>
     </nav>
@@ -91,6 +100,10 @@
             <div class="form-group">
                 <label for="gh-repo">仓库名称</label>
                 <input type="text" id="gh-repo" placeholder="your-repo">
+            </div>
+            <div class="form-group">
+                <label for="gh-branch">分支名称</label>
+                <input type="text" id="gh-branch" placeholder="main" value="main">
             </div>
             <div class="modal-footer">
                 <button id="btn-close-settings" class="btn btn-secondary">取消</button>

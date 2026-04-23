@@ -128,6 +128,9 @@ function updateToolbar() {
     }
 }
 
+let searchMode = 'local'; // 'local' or 'cloud'
+let searchTimeout = null;
+
 function setupEventListeners() {
     const btnNew = document.getElementById('btn-new');
     const btnEdit = document.getElementById('btn-edit');
@@ -142,6 +145,9 @@ function setupEventListeners() {
     const btnSaveSettings = document.getElementById('btn-save-settings');
     const btnCancelDelete = document.getElementById('btn-cancel-delete');
     const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+    const searchInput = document.getElementById('search-input');
+    const btnSearchLocal = document.getElementById('btn-search-local');
+    const btnSearchCloud = document.getElementById('btn-search-cloud');
 
     if (btnNew) btnNew.addEventListener('click', createNewNote);
     if (btnEdit) btnEdit.addEventListener('click', () => startEditing());
@@ -156,6 +162,217 @@ function setupEventListeners() {
     if (btnSaveSettings) btnSaveSettings.addEventListener('click', saveGitHubSettings);
     if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteConfirm);
     if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', confirmDelete);
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                handleSearch(e.target.value);
+            }, 300);
+        });
+    }
+
+    if (btnSearchLocal) {
+        btnSearchLocal.addEventListener('click', () => {
+            setSearchMode('local');
+            if (searchInput && searchInput.value) {
+                handleSearch(searchInput.value);
+            }
+        });
+    }
+
+    if (btnSearchCloud) {
+        btnSearchCloud.addEventListener('click', () => {
+            setSearchMode('cloud');
+            if (searchInput && searchInput.value) {
+                handleSearch(searchInput.value);
+            }
+        });
+    }
+}
+
+function setSearchMode(mode) {
+    searchMode = mode;
+    const btnSearchLocal = document.getElementById('btn-search-local');
+    const btnSearchCloud = document.getElementById('btn-search-cloud');
+
+    if (btnSearchLocal && btnSearchCloud) {
+        if (mode === 'local') {
+            btnSearchLocal.classList.add('btn-search-active');
+            btnSearchCloud.classList.remove('btn-search-active');
+        } else {
+            btnSearchCloud.classList.add('btn-search-active');
+            btnSearchLocal.classList.remove('btn-search-active');
+        }
+    }
+}
+
+function handleSearch(query) {
+    if (!query.trim()) {
+        clearSearchResults();
+        return;
+    }
+
+    if (searchMode === 'local') {
+        searchLocal(query);
+    } else {
+        searchCloud(query);
+    }
+}
+
+function searchLocal(query) {
+    const notes = Storage.getNotes();
+    const lowerQuery = query.toLowerCase();
+
+    const results = notes.filter(note => {
+        const titleMatch = note.title.toLowerCase().includes(lowerQuery);
+        const contentMatch = note.content.toLowerCase().includes(lowerQuery);
+        return titleMatch || contentMatch;
+    });
+
+    renderSearchResults(results.map(note => ({
+        id: note.id,
+        title: note.title,
+        content: note.content,
+        source: 'local'
+    })));
+}
+
+async function searchCloud(query) {
+    const searchResultsEl = document.getElementById('search-results');
+    if (searchResultsEl) {
+        searchResultsEl.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:10px;">🔍 正在搜索云端笔记...</p>';
+        searchResultsEl.style.display = 'block';
+    }
+
+    try {
+        const files = await GitHub.listFiles('note/');
+        const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+        const lowerQuery = query.toLowerCase();
+
+        const results = [];
+
+        for (const file of jsonFiles) {
+            try {
+                const content = await GitHub.getFileContent(`note/${file.name}`);
+                let noteData;
+                try {
+                    noteData = JSON.parse(content);
+                } catch (e) {
+                    console.error(`解析云端笔记 ${file.name} 失败:`, e);
+                    continue;
+                }
+                const noteId = noteData.id || file.name.replace('.json', '');
+
+                const titleMatch = (noteData.title || '').toLowerCase().includes(lowerQuery);
+                const contentMatch = (noteData.content || '').toLowerCase().includes(lowerQuery);
+
+                if (titleMatch || contentMatch) {
+                    results.push({
+                        id: noteId,
+                        title: noteData.title || '未命名',
+                        content: noteData.content || '',
+                        source: 'cloud'
+                    });
+                }
+            } catch (e) {
+                console.error('解析云端笔记失败:', e);
+            }
+        }
+
+        renderSearchResults(results);
+    } catch (error) {
+        console.error('搜索云端笔记失败:', error);
+        showToast('搜索云端失败，请检查 GitHub 配置', 'error');
+        if (searchResultsEl) {
+            searchResultsEl.innerHTML = '';
+            searchResultsEl.style.display = 'none';
+        }
+    }
+}
+
+function renderSearchResults(results) {
+    const searchResultsEl = document.getElementById('search-results');
+    if (!searchResultsEl) return;
+
+    if (results.length === 0) {
+        searchResultsEl.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:10px;">未找到匹配的笔记</p>';
+        searchResultsEl.style.display = 'block';
+        return;
+    }
+
+    searchResultsEl.innerHTML = results.map(result => `
+        <div class="search-result-item" data-id="${result.id}" data-source="${result.source}">
+            <span class="search-result-source">${result.source === 'local' ? '📁 本地' : '☁️ 云端'}</span>
+            <div class="search-result-title">${escapeHtml(result.title)}</div>
+            <div class="search-result-preview">${escapeHtml(result.content.substring(0, 80))}${result.content.length > 80 ? '...' : ''}</div>
+        </div>
+    `).join('');
+
+    searchResultsEl.style.display = 'block';
+
+    document.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', () => handleSearchResultClick(item));
+    });
+}
+
+function handleSearchResultClick(item) {
+    const id = item.dataset.id;
+    const source = item.dataset.source;
+
+    if (source === 'local') {
+        selectNote(id);
+    } else {
+        loadCloudNoteById(id);
+    }
+}
+
+async function loadCloudNoteById(id) {
+    try {
+        const content = await GitHub.getFileContent(`note/${id}.json`);
+        let noteData;
+        try {
+            noteData = JSON.parse(content);
+        } catch (e) {
+            showToast('笔记格式错误', 'error');
+            return;
+        }
+
+        const existingNote = Storage.getNoteById(id);
+        if (existingNote) {
+            if (confirm('本地已存在同名笔记，是否覆盖？')) {
+                Storage.updateNote(id, noteData.title || '未命名', noteData.content || '');
+                selectNote(id);
+            } else {
+                return;
+            }
+        } else {
+            const newNote = {
+                id: noteData.id || id,
+                title: noteData.title || '未命名',
+                content: noteData.content || '',
+                createdAt: noteData.createdAt || new Date().toISOString(),
+                updatedAt: noteData.updatedAt || new Date().toISOString(),
+                synced: true
+            };
+            Storage.addNote(newNote);
+            renderNoteList();
+            selectNote(newNote.id);
+            updateStats();
+        }
+        showToast('笔记已加载');
+    } catch (error) {
+        console.error('加载云端笔记失败:', error);
+        showToast('加载失败', 'error');
+    }
+}
+
+function clearSearchResults() {
+    const searchResultsEl = document.getElementById('search-results');
+    if (searchResultsEl) {
+        searchResultsEl.innerHTML = '';
+        searchResultsEl.style.display = 'none';
+    }
 }
 
 function createNewNote() {
@@ -369,7 +586,7 @@ async function loadFromGitHub() {
     }
 
     try {
-        const files = await GitHub.listFiles('note');
+        const files = await GitHub.listFiles('note/');
         console.log('仓库中的文件列表:', files);
         const jsonFiles = files.filter(f => f.name.endsWith('.json'));
         console.log('过滤后的 JSON 文件:', jsonFiles);
@@ -391,7 +608,13 @@ async function loadFromGitHub() {
             try {
                 const noteId = jsonFile.name.replace('.json', '');
                 const jsonContent = await GitHub.getFileContent(`note/${jsonFile.name}`);
-                const noteData = JSON.parse(jsonContent);
+                let noteData;
+                try {
+                    noteData = JSON.parse(jsonContent);
+                } catch (e) {
+                    console.error(`解析笔记 ${jsonFile.name} 失败:`, e);
+                    continue;
+                }
 
                 const existingNote = Storage.getNoteById(noteId);
                 if (!existingNote) {

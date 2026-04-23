@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具箱 - 在线笔记本</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/note.css">
+    <link rel="stylesheet" href="../static/css/tools.css">
+</head>
+<body>
+    <div class="menu-btn" id="menuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <nav class="side-menu" id="sideMenu">
+        <div class="user-section">
+            <h3>🛠️ 工具箱</h3>
+        </div>
+        <hr class="menu-divider">
+        <div class="menu-nav">
+            <a href="../index.html" class="nav-link">🏠 功能首页</a>
+            <a href="./note.html" class="nav-link">📝 笔记管理</a>
+            <a href="./tools.html" class="nav-link active">🛠️ 工具箱</a>
+        </div>
+        <hr class="menu-divider">
+        <button id="btn-open-api-settings" class="btn btn-secondary">⚙️ API 设置</button>
+    </nav>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main-content notes-main">
+        <div class="tools-container">
+            <section class="tool-section" id="ocr-section">
+                <h2>📷 OCR 图片文字识别</h2>
+                <p class="section-desc">上传图片，自动提取其中的文字</p>
+                <div class="upload-area" id="ocr-upload">
+                    <input type="file" id="ocr-file-input" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <span class="upload-icon">📁</span>
+                        <p>点击或拖拽上传图片</p>
+                    </div>
+                </div>
+                <div class="ocr-preview" id="ocr-preview" style="display: none;">
+                    <img id="ocr-preview-img" alt="预览">
+                </div>
+                <button id="ocr-start-btn" class="btn btn-primary" style="display: none;">🔍 开始识别</button>
+                <div class="ocr-result" id="ocr-result" style="display: none;">
+                    <h3>识别结果</h3>
+                    <textarea id="ocr-text-output" rows="8" placeholder="识别到的文字会显示在这里"></textarea>
+                    <button id="ocr-save-btn" class="btn btn-secondary">💾 保存为笔记</button>
+                </div>
+            </section>
+
+            <section class="tool-section" id="ai-section">
+                <h2>🤖 AI 文本处理</h2>
+                <p class="section-desc">使用 AI 润色、摘要或翻译文字</p>
+                <div class="ai-input-area">
+                    <textarea id="ai-text-input" rows="6" placeholder="输入要处理的文字..."></textarea>
+                    <div class="ai-actions">
+                        <select id="ai-action-select">
+                            <option value="polish">✨ 润色</option>
+                            <option value="summarize">📝 摘要</option>
+                            <option value="translate-en">🌐 翻译成英文</option>
+                            <option value="translate-zh">🇨🇳 翻译成中文</option>
+                        </select>
+                        <button id="ai-process-btn" class="btn btn-primary">🚀 处理</button>
+                    </div>
+                </div>
+                <div class="ai-result" id="ai-result" style="display: none;">
+                    <h3>处理结果</h3>
+                    <textarea id="ai-text-output" rows="6" placeholder="处理后的文字会显示在这里"></textarea>
+                    <button id="ai-save-btn" class="btn btn-secondary">💾 保存为笔记</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="api-settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>API 设置</h2>
+            <p class="settings-tip">配置第三方 API Key</p>
+            <div class="form-group">
+                <label for="api-openai-key">OpenAI / DeepSeek API Key</label>
+                <input type="password" id="api-openai-key" placeholder="sk-...">
+            </div>
+            <div class="form-group">
+                <label for="api-openai-base">API Base URL</label>
+                <input type="text" id="api-openai-base" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
+            </div>
+            <div class="form-group">
+                <label for="api-model">模型</label>
+                <input type="text" id="api-model" placeholder="gpt-4o-mini" value="gpt-4o-mini">
+            </div>
+            <div class="modal-footer">
+                <button id="btn-close-api-settings" class="btn btn-secondary">取消</button>
+                <button id="btn-save-api-settings" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5"></script>
+    <script src="../static/js/storage.js"></script>
+    <script src="../static/js/github.js"></script>
+    <script src="../static/js/tools.js" defer></script>
+</body>
+</html>
