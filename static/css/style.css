@@ -1,22 +1,199 @@
+/* 全局重置：统一盒模型+清除默认样式 */
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
+
+/* 页面基础样式：适配多设备+舒适阅读体验 */
 body {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 0 20px;
-    font-family: 微软雅黑;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 15px;
+    font-family: "微软雅黑", "PingFang SC", sans-serif;
     background: #f0f2f5;
-}
-h1 {
-    margin-bottom: 20px;
     color: #333;
+    position: relative; /* 为侧边栏/遮罩层定位做准备 */
+    min-height: 100vh; /* 铺满视口高度 */
 }
+
+/* 标题样式：层级清晰+间距合理 */
+h1 {
+    margin-bottom: 25px;
+    font-size: 2rem;
+    color: #2c3e50;
+}
+
+h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #2c3e50;
+}
+
+h4 {
+    margin: 15px 0;
+    font-size: 1rem;
+    color: #34495e;
+}
+
+/* 笔记展示框：优化内边距+阴影+圆角 */
 #text-box {
     background: white;
-    padding: 25px;
-    border-radius: 8px;
+    padding: 30px;
+    border-radius: 12px;
     line-height: 1.8;
     white-space: pre-wrap;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    min-height: 60vh; /* 保证最小高度，避免内容过少时布局塌陷 */
+}
+
+/* 汉堡菜单按钮：移动端导航触发 */
+.menu-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 35px;
+    height: 30px;
+    cursor: pointer;
+    z-index: 1001; /* 保证在最上层 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menu-btn span {
+    display: block;
+    width: 100%;
+    height: 4px;
+    background: #2c3e50;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* 汉堡菜单激活态：变成叉号 */
+.menu-btn.active span:nth-child(1) {
+    transform: translateY(13px) rotate(45deg);
+}
+
+.menu-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-btn.active span:nth-child(3) {
+    transform: translateY(-13px) rotate(-45deg);
+}
+
+/* 侧边导航栏：默认隐藏，展开时显示 */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    padding: 80px 20px 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transform: translateX(-100%); /* 初始隐藏 */
+    transition: transform 0.3s ease;
+    overflow-y: auto; /* 笔记过多时滚动 */
+}
+
+/* 侧边栏展开态 */
+.side-menu.active {
+    transform: translateX(0);
+}
+
+/* 导航菜单样式 */
+.menu-nav {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.menu-nav li {
+    margin: 10px 0;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #2c3e50;
+    font-size: 1rem;
+    padding: 8px 10px;
+    display: block;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.nav-link:hover {
+    background: #f0f2f5;
+}
+
+/* 菜单分隔线 */
+.menu-divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 10px 0;
+}
+
+/* 笔记列表样式 */
+.note-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.note-item {
+    text-decoration: none;
+    color: #3498db;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.note-item:hover {
+    background: #f0f2f5;
+    color: #2980b9;
+}
+
+/* 遮罩层：菜单展开时显示，点击关闭菜单 */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none; /* 初始不可点击 */
+    transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 主内容区：适配侧边栏展开，避免被遮挡 */
+.main-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+}
+
+/* 响应式适配：宽屏时默认展开侧边栏 */
+@media (min-width: 900px) {
+    .menu-btn {
+        display: none; /* 宽屏隐藏汉堡按钮 */
+    }
+    .side-menu {
+        transform: translateX(0); /* 宽屏默认展开 */
+    }
+    .main-content {
+        margin-left: 300px; /* 预留侧边栏空间 */
+    }
+    .overlay {
+        display: none; /* 宽屏隐藏遮罩层 */
+    }
 }

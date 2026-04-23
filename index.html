@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!--页面元信息不显示在页面上-->
+    <!-- 字符编码：必须放在<head>最顶部，保证编码解析正确 -->
     <meta charset="UTF-8">
-<!-- meta charset：元字符集 UTF-8：编码转换的一种-->
-
+    <!-- 移动端视口适配：响应式核心配置 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- meta name：元数据名称 viewport：视口   width：宽度 device：设备 initial-scale：初始比例-->
-
-    <title>在线笔记本</title>
-<!--<title>网页核心标题</title>-->
+    <!-- 网页标题：简洁且符合SEO规范 -->
+    <title>在线笔记本 - HTML核心知识点整理</title>
+    <!-- 引入外部样式表：分离样式，便于维护 -->
     <link rel="stylesheet" href="./static/css/style.css">
-<!--link rel：链接关系 href：超链接-->
 </head>
 <body>
-    <!-- 汉堡菜单按钮 -->
+    <!-- 汉堡菜单按钮：移动端/窄屏导航入口 -->
     <div class="menu-btn" id="menuBtn">
         <span></span>
         <span></span>
         <span></span>
     </div>
 
-    <!-- 侧边导航栏 -->
+    <!-- 侧边导航栏：菜单+笔记列表 -->
     <nav class="side-menu" id="sideMenu">
-        <h3>我的菜单</h3>
-        <ul>
-            <li><a href="./index.html">🏠 首页笔记</a></li>
-            <li><a href="./pages/about-note.html">ℹ️ 关于笔记</a></li>
+        <h3>导航菜单</h3>
+        <ul class="menu-nav">
+            <li><a href="./index.html" class="nav-link">🏠 首页笔记</a></li>
+            <li><a href="./pages/about-note.html" class="nav-link">ℹ️ 关于笔记</a></li>
         </ul>
-        <hr>
-        <h4>我的笔记列表</h4>
-        <div id="note-list"></div>
+        <hr class="menu-divider">
+        <h4>笔记列表</h4>
+        <div id="note-list" class="note-list"></div>
     </nav>
 
+    <!-- 遮罩层：菜单展开时覆盖主内容，增强交互 -->
     <div class="overlay" id="overlay"></div>
 
+    <!-- 主内容区：笔记展示核心区域 -->
     <main class="main-content">
-        <h1>我的在线笔记本</h1>
+        <h1>HTML核心知识点笔记</h1>
         <div id="text-box" class="text-box">
-            点击左侧汉堡菜单，选择笔记查看内容~
+            加载中...若长时间未显示，请检查文件路径~
         </div>
     </main>
 
+    <!-- 引入交互脚本：放在body底部，保证DOM加载完成 -->
     <script src="./static/js/script.js"></script>
 </body>
 </html>
