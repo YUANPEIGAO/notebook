@@ -384,6 +384,9 @@ async function loadFromGitHub() {
         }
 
         let loadedCount = 0;
+        const processedIds = new Set();
+
+        // 处理新的 JSON 格式
         for (const jsonFile of jsonFiles) {
             try {
                 const noteId = jsonFile.name.replace('.json', '');
@@ -408,12 +411,57 @@ async function loadFromGitHub() {
                         };
                         Storage.addNote(newNote);
                         loadedCount++;
+                        processedIds.add(finalNoteId);
                     }
                 } else {
                     console.log(`笔记 ${noteId} 已存在，跳过`);
+                    processedIds.add(noteId);
                 }
             } catch (e) {
                 console.error(`加载笔记 ${jsonFile.name} 失败:`, e);
+            }
+        }
+
+        // 处理旧的 TXT 格式 (向后兼容)
+        const txtFiles = files.filter(f => f.name.endsWith('_title.txt'));
+        console.log('找到旧格式 TXT 文件:', txtFiles);
+
+        for (const titleFile of txtFiles) {
+            try {
+                const noteId = titleFile.name.replace('_title.txt', '');
+                if (processedIds.has(noteId)) {
+                    console.log(`笔记 ${noteId} 已从 JSON 加载，跳过 TXT`);
+                    continue;
+                }
+
+                const existingNote = Storage.getNoteById(noteId);
+                if (existingNote) {
+                    console.log(`笔记 ${noteId} 已存在，跳过`);
+                    continue;
+                }
+
+                const title = await GitHub.getFileContent(`note/${titleFile.name}`);
+                let content = '';
+                
+                try {
+                    content = await GitHub.getFileContent(`note/${noteId}_content.txt`);
+                } catch (e) {
+                    console.log(`笔记 ${noteId} 没有内容文件`);
+                }
+
+                const newNote = {
+                    id: noteId,
+                    title: title || '未命名',
+                    content: content || '',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    synced: true
+                };
+                Storage.addNote(newNote);
+                loadedCount++;
+                console.log(`从 TXT 加载笔记: ${noteId}`);
+            } catch (e) {
+                console.error(`加载旧格式笔记 ${titleFile.name} 失败:`, e);
             }
         }
 
@@ -467,8 +515,9 @@ async function saveGitHubSettings() {
     const tokenInput = document.getElementById('gh-token');
     const ownerInput = document.getElementById('gh-owner');
     const repoInput = document.getElementById('gh-repo');
+    const branchInput = document.getElementById('gh-branch');
 
-    if (!tokenInput || !ownerInput || !repoInput) {
+    if (!tokenInput || !ownerInput || !repoInput || !branchInput) {
         showToast('设置表单元素不存在', 'error');
         return;
     }
@@ -476,13 +525,14 @@ async function saveGitHubSettings() {
     const token = tokenInput.value.trim();
     const owner = ownerInput.value.trim();
     const repo = repoInput.value.trim();
+    const branch = branchInput.value.trim() || 'main';
 
     if (!token || !owner || !repo) {
         showToast('请填写完整的 GitHub 配置信息', 'error');
         return;
     }
 
-    GitHub.saveConfig({ token, owner, repo });
+    GitHub.saveConfig({ token, owner, repo, branch });
 
     try {
         await GitHub.testConnection();
