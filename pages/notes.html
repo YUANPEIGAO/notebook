@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>笔记管理 - 在线笔记本</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/notes.css">
+</head>
+<body>
+    <div class="menu-btn" id="menuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <nav class="side-menu" id="sideMenu">
+        <div class="user-section">
+            <h3>📓 我的笔记</h3>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">总计</span>
+                    <span class="stat-value" id="stat-total">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">今日</span>
+                    <span class="stat-value" id="stat-today">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">待同步</span>
+                    <span class="stat-value" id="stat-unsynced">0</span>
+                </div>
+            </div>
+        </div>
+        <hr class="menu-divider">
+        <div class="menu-nav">
+            <a href="../index.html" class="nav-link">🏠 功能首页</a>
+            <a href="./notes.html" class="nav-link active">📝 笔记管理</a>
+        </div>
+        <hr class="menu-divider">
+        <div class="action-buttons">
+            <button id="btn-new" class="btn btn-primary">+ 新建笔记</button>
+            <button id="btn-sync" class="btn btn-secondary">🔄 同步到 GitHub</button>
+            <div class="sync-status">GitHub: <span id="sync-status">未配置</span></div>
+            <button id="btn-open-settings" class="btn btn-text">⚙️ 设置</button>
+        </div>
+        <hr class="menu-divider">
+        <h4>笔记列表</h4>
+        <div id="note-list" class="note-list"></div>
+    </nav>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main-content notes-main">
+        <div id="note-detail" class="note-detail">
+            <p class="empty-tip">请选择一个笔记或创建新笔记</p>
+        </div>
+
+        <div id="note-editor" class="note-editor" style="display: none;">
+            <div class="editor-header">
+                <input type="text" id="editor-title" class="editor-title" placeholder="笔记标题">
+            </div>
+            <textarea id="editor-content" class="editor-content" placeholder="开始编写笔记内容..."></textarea>
+            <div class="editor-footer">
+                <button id="btn-cancel" class="btn btn-secondary">取消</button>
+                <button id="btn-save" class="btn btn-primary">保存笔记</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="toolbar" id="toolbar" style="display: none;">
+        <button id="btn-edit" class="toolbar-btn" title="编辑">✏️ 编辑</button>
+        <button id="btn-delete" class="toolbar-btn" title="删除">🗑️ 删除</button>
+        <button id="btn-sync-note" class="toolbar-btn" title="同步">⬆️ 同步</button>
+    </div>
+
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>GitHub 设置</h2>
+            <p class="settings-tip">配置你的 GitHub 信息，用于同步笔记到仓库</p>
+            <div class="form-group">
+                <label for="gh-token">Personal Access Token</label>
+                <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+                <small>在 GitHub Settings → Developer settings → Personal access tokens 生成</small>
+            </div>
+            <div class="form-group">
+                <label for="gh-owner">仓库所有者（用户名）</label>
+                <input type="text" id="gh-owner" placeholder="your-username">
+            </div>
+            <div class="form-group">
+                <label for="gh-repo">仓库名称</label>
+                <input type="text" id="gh-repo" placeholder="your-repo">
+            </div>
+            <div class="modal-footer">
+                <button id="btn-close-settings" class="btn btn-secondary">取消</button>
+                <button id="btn-save-settings" class="btn btn-primary">保存并测试</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../static/js/storage.js"></script>
+    <script src="../static/js/github.js"></script>
+    <script src="../static/js/notes.js"></script>
+</body>
+</html>
