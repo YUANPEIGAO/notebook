@@ -370,7 +370,9 @@ async function loadFromGitHub() {
 
     try {
         const files = await GitHub.listFiles('note');
+        console.log('仓库中的文件列表:', files);
         const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+        console.log('过滤后的 JSON 文件:', jsonFiles);
 
         if (jsonFiles.length === 0) {
             showToast('仓库中没有找到笔记');

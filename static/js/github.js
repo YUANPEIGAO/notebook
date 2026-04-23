@@ -139,7 +139,15 @@ const GitHub = {
             throw new Error('获取文件列表失败');
         }
 
-        return await response.json();
+        const data = await response.json();
+        
+        if (Array.isArray(data)) {
+            return data;
+        } else if (data && typeof data === 'object' && data.type === 'file') {
+            return [data];
+        }
+        
+        return [];
     },
 
     async testConnection() {
