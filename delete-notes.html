@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>删除 Notes 文件夹</title>
+    <link rel="stylesheet" href="./static/css/style.css">
+</head>
+<body>
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+    <nav class="side-menu" id="sideMenu">
+        <h2>☁️ 笔记本</h2>
+        <ul class="menu-nav">
+            <li><a href="./index.html" class="nav-link">🏠 功能首页</a></li>
+            <li><a href="./pages/notes.html" class="nav-link">📝 笔记管理</a></li>
+            <li><a href="./pages/about-note.html" class="nav-link">📖 关于笔记</a></li>
+        </ul>
+    </nav>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main-content">
+        <h1>删除 Notes 文件夹</h1>
+        <p class="text-box">这个页面将删除 GitHub 仓库里的 notes 文件夹</p>
+
+        <div class="button-group" style="margin: 30px 0;">
+            <button id="btn-config" class="btn btn-primary">1. 配置 GitHub</button>
+            <button id="btn-list" class="btn btn-primary">2. 列出 Notes 文件</button>
+            <button id="btn-delete" class="btn btn-danger" disabled>3. 删除 Notes 文件夹</button>
+        </div>
+
+        <div id="status" class="text-box"></div>
+    </main>
+
+    <!-- 设置弹窗 -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h3>GitHub 设置</h3>
+            <label>Personal Access Token</label>
+            <input type="text" id="gh-token" placeholder="ghp_...">
+            <label>仓库所有者（用户名）</label>
+            <input type="text" id="gh-owner" placeholder="YUANPEIGAO">
+            <label>仓库名称</label>
+            <input type="text" id="gh-repo" placeholder="notebook">
+            <div class="button-group">
+                <button id="btn-close-settings" class="btn btn-secondary">取消</button>
+                <button id="btn-save-settings" class="btn btn-primary">保存并测试</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="./static/js/storage.js"></script>
+    <script src="./static/js/github.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', async () => {
+    initMenuEvents();
+
+    const statusEl = document.getElementById('status');
+    const btnConfig = document.getElementById('btn-config');
+    const btnList = document.getElementById('btn-list');
+    const btnDelete = document.getElementById('btn-delete');
+
+    btnConfig.addEventListener('click', openSettings);
+    btnList.addEventListener('click', listNotesFiles);
+    btnDelete.addEventListener('click', deleteNotesFolder);
+
+    initSettingsEvents();
+    checkGitHubConfig();
+
+    function openSettings() {
+        const modal = document.getElementById('settings-modal');
+        if (!modal) return;
+
+        modal.style.display = 'flex';
+        const config = GitHub.loadConfig();
+
+        const tokenInput = document.getElementById('gh-token');
+        const ownerInput = document.getElementById('gh-owner');
+        const repoInput = document.getElementById('gh-repo');
+
+        if (tokenInput) tokenInput.value = config.token || '';
+        if (ownerInput) ownerInput.value = config.owner || '';
+        if (repoInput) repoInput.value = config.repo || '';
+    }
+
+    function checkGitHubConfig() {
+        const configured = GitHub.isConfigured();
+        if (configured) {
+            btnList.disabled = false;
+            showStatus('GitHub 已配置，可以继续', 'success');
+        } else {
+            showStatus('请先配置 GitHub', 'error');
+        }
+    }
+
+    function initSettingsEvents() {
+        const btnCloseSettings = document.getElementById('btn-close-settings');
+        const btnSaveSettings = document.getElementById('btn-save-settings');
+
+        if (btnCloseSettings) {
+            btnCloseSettings.addEventListener('click', () => {
+                document.getElementById('settings-modal').style.display = 'none';
+            });
+        }
+        if (btnSaveSettings) {
+            btnSaveSettings.addEventListener('click', saveSettings);
+        }
+    }
+
+    async function saveSettings() {
+        const tokenInput = document.getElementById('gh-token');
+        const ownerInput = document.getElementById('gh-owner');
+        const repoInput = document.getElementById('gh-repo');
+
+        if (!tokenInput || !ownerInput || !repoInput) {
+            showToast('设置表单元素不存在', 'error');
+            return;
+        }
+
+        const token = tokenInput.value.trim();
+        const owner = ownerInput.value.trim();
+        const repo = repoInput.value.trim();
+
+        if (!token || !owner || !repo) {
+            showToast('请填写完整的 GitHub 配置信息', 'error');
+            return;
+        }
+
+        GitHub.saveConfig({ token, owner, repo });
+
+        try {
+            await GitHub.testConnection();
+            showToast('GitHub 连接测试成功');
+            document.getElementById('settings-modal').style.display = 'none';
+            checkGitHubConfig();
+        } catch (error) {
+            showToast('连接失败：' + error.message, 'error');
+        }
+    }
+
+    async function listNotesFiles() {
+        showStatus('正在列出 notes 文件夹...');
+        try {
+            const files = await GitHub.listFiles('notes');
+
+            if (!Array.isArray(files)) {
+                showStatus('notes 文件夹不存在或为空', 'warning');
+                btnDelete.disabled = true;
+                return;
+            }
+
+            showStatus(`找到 ${files.length} 个文件，准备删除`);
+            btnDelete.disabled = false;
+
+        } catch (error) {
+            if (error.message.includes('获取文件列表失败')) {
+                showStatus('notes 文件夹不存在', 'warning');
+            } else {
+                showStatus('列出文件失败：' + error.message, 'error');
+            }
+        }
+    }
+
+    async function deleteNotesFolder() {
+        showStatus('正在删除 notes 文件夹...');
+        try {
+            const files = await GitHub.listFiles('notes');
+
+            if (!Array.isArray(files) || files.length === 0) {
+                showStatus('没有文件可删除', 'warning');
+                return;
+            }
+
+            let deletedCount = 0;
+            for (const file of files) {
+                try {
+                    await GitHub.deleteFile(`notes/${file.name}`, `Delete ${file.name}`);
+                    deletedCount++;
+                    showStatus(`已删除 ${deletedCount}/${files.length}...`);
+                } catch (err) {
+                    console.error(`删除失败 ${file.name}:`, err);
+                }
+            }
+
+            showStatus(`成功删除 ${deletedCount} 个文件！`, 'success');
+            btnDelete.disabled = true;
+
+        } catch (error) {
+            showStatus('删除失败：' + error.message, 'error');
+        }
+    }
+
+    function showStatus(message, type = 'info') {
+        if (statusEl) {
+            statusEl.textContent = message;
+            statusEl.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+        }
+        console.log(message);
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => {
+            toast.className = 'toast';
+        }, 3000);
+    }
+
+    function initMenuEvents() {
+        const menuBtn = document.getElementById('menuBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        const overlay = document.getElementById('overlay');
+
+        if (!menuBtn || !sideMenu || !overlay) return;
+
+        menuBtn.addEventListener('click', () => {
+            sideMenu.classList.toggle('active');
+            menuBtn.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sideMenu.classList.remove('active');
+            menuBtn.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+});
+    </script>
+</body>
+</html>
