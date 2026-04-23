@@ -76,6 +76,12 @@ const Storage = {
         };
     },
 
+    addNote(newNote) {
+        const notes = this.getNotes();
+        notes.unshift(newNote);
+        this.saveNotes(notes);
+    },
+
     clearAll() {
         localStorage.removeItem(STORAGE_KEY);
     }

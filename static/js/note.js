@@ -191,15 +191,15 @@ function saveCurrentNote() {
         return;
     }
 
-    if (currentNote && currentNote.isNew) {
-        Storage.updateNote(currentNote.id, title, content);
-        currentNote.isNew = false;
-    } else if (currentNote) {
-        Storage.updateNote(currentNote.id, title, content);
-    }
+    if (!currentNote) return;
+
+    Storage.updateNote(currentNote.id, title, content);
+    currentNote.title = title;
+    currentNote.content = content;
+    currentNote.isNew = false;
+    currentNote.synced = false;
 
     isEditing = false;
-    currentNote = null;
     renderNoteList();
     renderNoteDetail();
     updateStats();
@@ -374,6 +374,10 @@ async function loadFromGitHub() {
 
         if (jsonFiles.length === 0) {
             showToast('仓库中没有找到笔记');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '从仓库加载';
+            }
             return;
         }
 
@@ -386,16 +390,25 @@ async function loadFromGitHub() {
 
                 const existingNote = Storage.getNoteById(noteId);
                 if (!existingNote) {
-                    const newNote = {
-                        id: noteData.id || noteId,
-                        title: noteData.title || '未命名',
-                        content: noteData.content || '',
-                        createdAt: noteData.createdAt || new Date().toISOString(),
-                        updatedAt: noteData.updatedAt || new Date().toISOString(),
-                        synced: true
-                    };
-                    Storage.saveNotes([newNote, ...Storage.getNotes()]);
-                    loadedCount++;
+                    const finalNoteId = noteData.id || noteId;
+                    const existingByDataId = noteData.id ? Storage.getNoteById(noteData.id) : null;
+                    
+                    if (existingByDataId) {
+                        console.log(`笔记 ${noteId} (${noteData.id}) 已存在，跳过`);
+                    } else {
+                        const newNote = {
+                            id: finalNoteId,
+                            title: noteData.title || '未命名',
+                            content: noteData.content || '',
+                            createdAt: noteData.createdAt || new Date().toISOString(),
+                            updatedAt: noteData.updatedAt || new Date().toISOString(),
+                            synced: true
+                        };
+                        Storage.addNote(newNote);
+                        loadedCount++;
+                    }
+                } else {
+                    console.log(`笔记 ${noteId} 已存在，跳过`);
                 }
             } catch (e) {
                 console.error(`加载笔记 ${jsonFile.name} 失败:`, e);
@@ -404,7 +417,12 @@ async function loadFromGitHub() {
 
         renderNoteList();
         updateStats();
-        showToast(`成功加载 ${loadedCount} 篇笔记`);
+        
+        if (loadedCount > 0) {
+            showToast(`成功加载 ${loadedCount} 篇笔记`);
+        } else {
+            showToast('没有新笔记需要加载');
+        }
     } catch (error) {
         showToast('加载失败：' + error.message, 'error');
     } finally {
