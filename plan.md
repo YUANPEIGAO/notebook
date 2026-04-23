@@ -53,7 +53,7 @@ backend/
 │   └── database.js            # 数据库配置
 ├── routes/
 │   ├── auth.js                # GitHub OAuth路由
-│   ├── notes.js               # 笔记CRUD路由
+│   ├── note.js               # 笔记CRUD路由
 │   └── stats.js               # 统计API路由
 ├── middleware/
 │   └── auth.js                # 认证中间件
@@ -228,13 +228,13 @@ Response: {
 
 <!-- 快捷入口 -->
 <section class="quick-access">
-    <a href="./notes.html" class="btn-primary">进入笔记</a>
+    <a href="./note.html" class="btn-primary">进入笔记</a>
 </section>
 ```
 
 **新增页面：**
 - `index.html` → 重构为功能介绍页
-- `notes.html` → 新增笔记管理页面（替代原首页功能）
+- `note.html` → 新增笔记管理页面（替代原首页功能）
 - `profile.html` → 新增用户个人中心页面
 
 ---
@@ -250,7 +250,7 @@ backend/
 ├── package.json
 ├── config/database.js
 ├── routes/auth.js
-├── routes/notes.js
+├── routes/note.js
 ├── routes/stats.js
 ├── middleware/auth.js
 ├── models/User.js
@@ -269,11 +269,11 @@ backend/
    - 创建会话并返回给前端
 
 #### 3.1.3 实现笔记CRUD API
-- `GET /api/notes` - 获取笔记列表
-- `GET /api/notes/:id` - 获取笔记详情
-- `POST /api/notes` - 创建笔记
-- `PUT /api/notes/:id` - 更新笔记（自动创建版本）
-- `DELETE /api/notes/:id` - 删除笔记
+- `GET /api/note` - 获取笔记列表
+- `GET /api/note/:id` - 获取笔记详情
+- `POST /api/note` - 创建笔记
+- `PUT /api/note/:id` - 更新笔记（自动创建版本）
+- `DELETE /api/note/:id` - 删除笔记
 
 #### 3.1.4 实现统计API
 - `GET /api/stats` - 获取用户统计数据
@@ -287,7 +287,7 @@ backend/
 - 添加使用流程指南
 - 添加快捷入口按钮
 
-#### 3.2.2 新增notes.html页面
+#### 3.2.2 新增note.html页面
 - 完整的笔记管理界面
 - 集成Quill.js富文本编辑器
 - 实现编辑/查看模式切换
@@ -332,17 +332,17 @@ backend/
 | `backend/package.json` | 后端依赖配置 |
 | `backend/config/database.js` | 数据库配置 |
 | `backend/routes/auth.js` | 认证路由 |
-| `backend/routes/notes.js` | 笔记路由 |
+| `backend/routes/note.js` | 笔记路由 |
 | `backend/routes/stats.js` | 统计路由 |
 | `backend/middleware/auth.js` | 认证中间件 |
 | `backend/models/User.js` | 用户模型 |
 | `backend/models/Note.js` | 笔记模型 |
 | `backend/models/NoteVersion.js` | 版本模型 |
 | `backend/utils/github.js` | GitHub API工具 |
-| `notes.html` | 笔记管理页面 |
+| `note.html` | 笔记管理页面 |
 | `profile.html` | 用户个人中心 |
 | `static/js/auth.js` | 认证模块 |
-| `static/js/notes.js` | 笔记管理模块 |
+| `static/js/note.js` | 笔记管理模块 |
 | `static/css/style.css` | 更新样式文件 |
 
 ### 修改文件
