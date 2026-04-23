@@ -249,30 +249,21 @@ async function syncToGitHub() {
     }
 
     try {
-        const manifest = {
-            lastSync: new Date().toISOString(),
-            notes: notes.map(n => ({
-                id: n.id,
-                title: n.title,
-                content: n.content,
-                createdAt: n.createdAt,
-                updatedAt: n.updatedAt
-            }))
-        };
-
-        await GitHub.uploadFile(
-            'notes/manifest.json',
-            JSON.stringify(manifest, null, 2),
-            `Sync notes: ${new Date().toLocaleString()}`
-        );
-
         for (const note of unsyncedNotes) {
-            const fileName = `notes/${note.id}.json`;
+            const noteId = note.id;
+
             await GitHub.uploadFile(
-                fileName,
-                JSON.stringify(note, null, 2),
-                `Update note: ${note.title}`
+                `note/${noteId}_title.txt`,
+                note.title,
+                `Update title: ${note.title}`
             );
+
+            await GitHub.uploadFile(
+                `note/${noteId}_content.txt`,
+                note.content,
+                `Update content: ${note.title}`
+            );
+
             Storage.markAsSynced(note.id, 'synced');
         }
 
@@ -303,27 +294,44 @@ async function loadFromGitHub() {
     }
 
     try {
-        const files = await GitHub.listFiles('notes');
-        const jsonFiles = files.filter(f => f.name.endsWith('.json') && f.name !== 'manifest.json');
+        const files = await GitHub.listFiles('note');
+        const titleFiles = files.filter(f => f.name.endsWith('_title.txt'));
 
-        if (jsonFiles.length === 0) {
+        if (titleFiles.length === 0) {
             showToast('仓库中没有找到笔记');
             return;
         }
 
         let loadedCount = 0;
-        for (const file of jsonFiles) {
+        for (const titleFile of titleFiles) {
             try {
-                const content = await GitHub.getFileContent(`notes/${file.name}`);
-                const note = JSON.parse(content);
+                const noteId = titleFile.name.replace('_title.txt', '');
+                const contentFileName = `${noteId}_content.txt`;
 
-                const existingNote = Storage.getNoteById(note.id);
+                const titleContent = await GitHub.getFileContent(`note/${titleFile.name}`);
+                let contentContent = '';
+
+                try {
+                    contentContent = await GitHub.getFileContent(`note/${contentFileName}`);
+                } catch (e) {
+                    console.log(`笔记 ${noteId} 没有内容文件`);
+                }
+
+                const existingNote = Storage.getNoteById(noteId);
                 if (!existingNote) {
-                    Storage.saveNotes([note, ...Storage.getNotes()]);
+                    const newNote = {
+                        id: noteId,
+                        title: titleContent,
+                        content: contentContent,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        synced: true
+                    };
+                    Storage.saveNotes([newNote, ...Storage.getNotes()]);
                     loadedCount++;
                 }
             } catch (e) {
-                console.error(`加载笔记 ${file.name} 失败:`, e);
+                console.error(`加载笔记 ${titleFile.name} 失败:`, e);
             }
         }
 
@@ -369,9 +377,18 @@ function closeSettings() {
 }
 
 async function saveGitHubSettings() {
-    const token = document.getElementById('gh-token').value.trim();
-    const owner = document.getElementById('gh-owner').value.trim();
-    const repo = document.getElementById('gh-repo').value.trim();
+    const tokenInput = document.getElementById('gh-token');
+    const ownerInput = document.getElementById('gh-owner');
+    const repoInput = document.getElementById('gh-repo');
+
+    if (!tokenInput || !ownerInput || !repoInput) {
+        showToast('设置表单元素不存在', 'error');
+        return;
+    }
+
+    const token = tokenInput.value.trim();
+    const owner = ownerInput.value.trim();
+    const repo = repoInput.value.trim();
 
     if (!token || !owner || !repo) {
         showToast('请填写完整的 GitHub 配置信息', 'error');
