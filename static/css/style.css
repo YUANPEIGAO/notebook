@@ -7,14 +7,61 @@
 
 /* 页面基础样式：适配多设备+舒适阅读体验 */
 body {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px 15px;
-    font-family: "微软雅黑", "PingFang SC", sans-serif;
+    font-family: "微软雅黑", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
     background: #f0f2f5;
     color: #333;
-    position: relative; /* 为侧边栏/遮罩层定位做准备 */
-    min-height: 100vh; /* 铺满视口高度 */
+    position: relative;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%; /* 防止 iOS 自动放大 */
+}
+
+/* 小屏设备优化（手机） */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    #text-box {
+        padding: 20px;
+        min-height: 50vh;
+    }
+
+    .menu-btn {
+        top: 15px;
+        left: 15px;
+        width: 30px;
+        height: 26px;
+    }
+}
+
+/* 中等屏设备（大屏手机/小平板） */
+@media (min-width: 481px) and (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+}
+
+/* 平板设备 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    body {
+        padding: 25px 20px;
+    }
 }
 
 /* 标题样式：层级清晰+间距合理 */
@@ -94,9 +141,31 @@ h4 {
     padding: 80px 20px 20px;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    transform: translateX(-100%); /* 初始隐藏 */
+    transform: translateX(-100%);
     transition: transform 0.3s ease;
-    overflow-y: auto; /* 笔记过多时滚动 */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+}
+
+/* 小屏侧边栏优化 */
+@media (max-width: 480px) {
+    .side-menu {
+        width: 100%;
+        max-width: 300px;
+        padding: 70px 15px 15px;
+    }
+
+    .side-menu.active {
+        transform: translateX(0);
+    }
+}
+
+/* 大屏侧边栏优化 */
+@media (min-width: 1200px) {
+    .side-menu {
+        width: 320px;
+        padding: 90px 25px 25px;
+    }
 }
 
 /* 侧边栏展开态 */
@@ -185,15 +254,22 @@ h4 {
 /* 响应式适配：宽屏时默认展开侧边栏 */
 @media (min-width: 900px) {
     .menu-btn {
-        display: none; /* 宽屏隐藏汉堡按钮 */
+        display: none;
     }
     .side-menu {
-        transform: translateX(0); /* 宽屏默认展开 */
+        transform: translateX(0);
     }
     .main-content {
-        margin-left: 300px; /* 预留侧边栏空间 */
+        margin-left: 300px;
     }
     .overlay {
-        display: none; /* 宽屏隐藏遮罩层 */
+        display: none;
+    }
+}
+
+/* 超宽屏优化 */
+@media (min-width: 1400px) {
+    body {
+        padding: 30px;
     }
 }

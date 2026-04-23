@@ -135,21 +135,27 @@ function setupEventListeners() {
     const btnCancel = document.getElementById('btn-cancel');
     const btnDelete = document.getElementById('btn-delete');
     const btnSync = document.getElementById('btn-sync');
+    const btnSyncNote = document.getElementById('btn-sync-note');
     const btnLoad = document.getElementById('btn-load');
     const btnOpenSettings = document.getElementById('btn-open-settings');
     const btnCloseSettings = document.getElementById('btn-close-settings');
     const btnSaveSettings = document.getElementById('btn-save-settings');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
     if (btnNew) btnNew.addEventListener('click', createNewNote);
     if (btnEdit) btnEdit.addEventListener('click', () => startEditing());
     if (btnSave) btnSave.addEventListener('click', saveCurrentNote);
     if (btnCancel) btnCancel.addEventListener('click', cancelEditing);
-    if (btnDelete) btnDelete.addEventListener('click', deleteCurrentNote);
+    if (btnDelete) btnDelete.addEventListener('click', showDeleteConfirm);
     if (btnSync) btnSync.addEventListener('click', syncToGitHub);
+    if (btnSyncNote) btnSyncNote.addEventListener('click', syncCurrentNote);
     if (btnLoad) btnLoad.addEventListener('click', loadFromGitHub);
     if (btnOpenSettings) btnOpenSettings.addEventListener('click', openSettings);
     if (btnCloseSettings) btnCloseSettings.addEventListener('click', closeSettings);
     if (btnSaveSettings) btnSaveSettings.addEventListener('click', saveGitHubSettings);
+    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteConfirm);
+    if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', confirmDelete);
 }
 
 function createNewNote() {
@@ -211,20 +217,88 @@ function cancelEditing() {
     updateToolbar();
 }
 
-function deleteCurrentNote() {
+/* 删除确认相关函数 */
+function showDeleteConfirm() {
+    if (!currentNote) return;
+    
+    const deleteModal = document.getElementById('delete-modal');
+    const deleteNoteTitle = document.getElementById('delete-note-title');
+    
+    if (deleteNoteTitle) {
+        deleteNoteTitle.textContent = `《${currentNote.title}》`;
+    }
+    
+    if (deleteModal) {
+        deleteModal.style.display = 'flex';
+    }
+}
+
+function closeDeleteConfirm() {
+    const deleteModal = document.getElementById('delete-modal');
+    if (deleteModal) {
+        deleteModal.style.display = 'none';
+    }
+}
+
+async function confirmDelete() {
     if (!currentNote) return;
 
-    if (!confirm(`确定要删除笔记"${currentNote.title}"吗？`)) {
+    try {
+        if (GitHub.isConfigured()) {
+            try {
+                await GitHub.deleteFile(
+                    `note/${currentNote.id}.json`,
+                    `Delete note: ${currentNote.title}`
+                );
+            } catch (e) {
+                console.log('删除云端文件失败，可能文件不存在');
+            }
+        }
+
+        Storage.deleteNote(currentNote.id);
+        currentNote = null;
+        isEditing = false;
+        closeDeleteConfirm();
+        renderNoteList();
+        renderNoteDetail();
+        updateStats();
+        showToast('笔记已删除');
+    } catch (error) {
+        showToast('删除失败：' + error.message, 'error');
+    }
+}
+
+async function syncCurrentNote() {
+    if (!currentNote) return;
+
+    if (!GitHub.isConfigured()) {
+        showToast('请先配置 GitHub 设置', 'error');
+        openSettings();
         return;
     }
 
-    Storage.deleteNote(currentNote.id);
-    currentNote = null;
-    isEditing = false;
-    renderNoteList();
-    renderNoteDetail();
-    updateStats();
-    showToast('笔记已删除');
+    try {
+        const noteData = {
+            id: currentNote.id,
+            title: currentNote.title,
+            content: currentNote.content,
+            createdAt: currentNote.createdAt,
+            updatedAt: currentNote.updatedAt
+        };
+
+        await GitHub.uploadFile(
+            `note/${currentNote.id}.json`,
+            JSON.stringify(noteData, null, 2),
+            `Update note: ${currentNote.title}`
+        );
+
+        Storage.markAsSynced(currentNote.id, 'synced');
+        renderNoteList();
+        updateStats();
+        showToast('笔记已同步');
+    } catch (error) {
+        showToast('同步失败：' + error.message, 'error');
+    }
 }
 
 async function syncToGitHub() {
@@ -251,17 +325,18 @@ async function syncToGitHub() {
     try {
         for (const note of unsyncedNotes) {
             const noteId = note.id;
+            const noteData = {
+                id: note.id,
+                title: note.title,
+                content: note.content,
+                createdAt: note.createdAt,
+                updatedAt: note.updatedAt
+            };
 
             await GitHub.uploadFile(
-                `note/${noteId}_title.txt`,
-                note.title,
-                `Update title: ${note.title}`
-            );
-
-            await GitHub.uploadFile(
-                `note/${noteId}_content.txt`,
-                note.content,
-                `Update content: ${note.title}`
+                `note/${noteId}.json`,
+                JSON.stringify(noteData, null, 2),
+                `Update note: ${note.title}`
             );
 
             Storage.markAsSynced(note.id, 'synced');
@@ -295,43 +370,35 @@ async function loadFromGitHub() {
 
     try {
         const files = await GitHub.listFiles('note');
-        const titleFiles = files.filter(f => f.name.endsWith('_title.txt'));
+        const jsonFiles = files.filter(f => f.name.endsWith('.json'));
 
-        if (titleFiles.length === 0) {
+        if (jsonFiles.length === 0) {
             showToast('仓库中没有找到笔记');
             return;
         }
 
         let loadedCount = 0;
-        for (const titleFile of titleFiles) {
+        for (const jsonFile of jsonFiles) {
             try {
-                const noteId = titleFile.name.replace('_title.txt', '');
-                const contentFileName = `${noteId}_content.txt`;
-
-                const titleContent = await GitHub.getFileContent(`note/${titleFile.name}`);
-                let contentContent = '';
-
-                try {
-                    contentContent = await GitHub.getFileContent(`note/${contentFileName}`);
-                } catch (e) {
-                    console.log(`笔记 ${noteId} 没有内容文件`);
-                }
+                const noteId = jsonFile.name.replace('.json', '');
+                const jsonContent = await GitHub.getFileContent(`note/${jsonFile.name}`);
+                const noteData = JSON.parse(jsonContent);
 
                 const existingNote = Storage.getNoteById(noteId);
                 if (!existingNote) {
                     const newNote = {
-                        id: noteId,
-                        title: titleContent,
-                        content: contentContent,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString(),
+                        id: noteData.id || noteId,
+                        title: noteData.title || '未命名',
+                        content: noteData.content || '',
+                        createdAt: noteData.createdAt || new Date().toISOString(),
+                        updatedAt: noteData.updatedAt || new Date().toISOString(),
                         synced: true
                     };
                     Storage.saveNotes([newNote, ...Storage.getNotes()]);
                     loadedCount++;
                 }
             } catch (e) {
-                console.error(`加载笔记 ${titleFile.name} 失败:`, e);
+                console.error(`加载笔记 ${jsonFile.name} 失败:`, e);
             }
         }
 
