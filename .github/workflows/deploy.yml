@@ -21,16 +21,14 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
     - uses: actions/checkout@v4
-    - name: List files
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+    - name: List uploaded files
       run: ls -la
-    - name: Check directory structure
-      run: find . -type f | sort | head -30
-    - name: Verify HTML files
-      run: find . -name "*.html" | head -20
-    - name: Verify JavaScript files
-      run: find . -name "*.js" | head -20
-    - name: Check for .nojekyll file
-      run: ls -la | grep .nojekyll
 
   deploy:
     needs: build
