@@ -18,7 +18,8 @@ const Storage = {
             content: content || '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            synced: false
+            synced: false,
+            isNew: true
         };
         notes.unshift(newNote);
         this.saveNotes(notes);

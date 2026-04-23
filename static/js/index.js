@@ -9,6 +9,8 @@ function initMenuEvents() {
     const sideMenu = document.getElementById('sideMenu');
     const overlay = document.getElementById('overlay');
 
+    if (!menuBtn || !sideMenu || !overlay) return;
+
     menuBtn.addEventListener('click', () => {
         sideMenu.classList.toggle('active');
         menuBtn.classList.toggle('active');
@@ -37,28 +39,61 @@ function initMenuEvents() {
 }
 
 function initSettingsEvents() {
-    document.getElementById('btn-open-settings').addEventListener('click', openSettings);
-    document.getElementById('btn-open-settings-footer').addEventListener('click', openSettings);
-    document.getElementById('btn-close-settings').addEventListener('click', closeSettings);
-    document.getElementById('btn-save-settings').addEventListener('click', saveGitHubSettings);
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const btnOpenSettingsFooter = document.getElementById('btn-open-settings-footer');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const btnSaveSettings = document.getElementById('btn-save-settings');
+
+    if (btnOpenSettings) {
+        btnOpenSettings.addEventListener('click', openSettings);
+    }
+    if (btnOpenSettingsFooter) {
+        btnOpenSettingsFooter.addEventListener('click', openSettings);
+    }
+    if (btnCloseSettings) {
+        btnCloseSettings.addEventListener('click', closeSettings);
+    }
+    if (btnSaveSettings) {
+        btnSaveSettings.addEventListener('click', saveGitHubSettings);
+    }
 }
 
 function openSettings() {
-    document.getElementById('settings-modal').style.display = 'flex';
+    const modal = document.getElementById('settings-modal');
+    if (!modal) return;
+
+    modal.style.display = 'flex';
     const config = GitHub.loadConfig();
-    document.getElementById('gh-token').value = config.token || '';
-    document.getElementById('gh-owner').value = config.owner || '';
-    document.getElementById('gh-repo').value = config.repo || '';
+
+    const tokenInput = document.getElementById('gh-token');
+    const ownerInput = document.getElementById('gh-owner');
+    const repoInput = document.getElementById('gh-repo');
+
+    if (tokenInput) tokenInput.value = config.token || '';
+    if (ownerInput) ownerInput.value = config.owner || '';
+    if (repoInput) repoInput.value = config.repo || '';
 }
 
 function closeSettings() {
-    document.getElementById('settings-modal').style.display = 'none';
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 async function saveGitHubSettings() {
-    const token = document.getElementById('gh-token').value.trim();
-    const owner = document.getElementById('gh-owner').value.trim();
-    const repo = document.getElementById('gh-repo').value.trim();
+    const tokenInput = document.getElementById('gh-token');
+    const ownerInput = document.getElementById('gh-owner');
+    const repoInput = document.getElementById('gh-repo');
+
+    if (!tokenInput || !ownerInput || !repoInput) {
+        showToast('设置表单元素不存在', 'error');
+        return;
+    }
+
+    const token = tokenInput.value.trim();
+    const owner = ownerInput.value.trim();
+    const repo = repoInput.value.trim();
 
     if (!token || !owner || !repo) {
         showToast('请填写完整的 GitHub 配置信息', 'error');
@@ -78,12 +113,16 @@ async function saveGitHubSettings() {
 }
 
 function checkGitHubConfig() {
+    const syncStatusEl = document.getElementById('sync-status');
+    if (!syncStatusEl) return;
+
     const configured = GitHub.isConfigured();
-    document.getElementById('sync-status').textContent = configured ? '已配置' : '未配置';
+    syncStatusEl.textContent = configured ? '已配置' : '未配置';
 }
 
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
+    if (!toast) return;
     toast.textContent = message;
     toast.className = `toast show ${type}`;
     setTimeout(() => {
