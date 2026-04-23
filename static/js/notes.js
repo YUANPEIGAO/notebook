@@ -2,15 +2,52 @@ let currentNote = null;
 let isEditing = false;
 
 function initNotesApp() {
+    initMenuEvents();
     renderNoteList();
     updateStats();
     setupEventListeners();
     checkGitHubConfig();
 }
 
+function initMenuEvents() {
+    const menuBtn = document.getElementById('menuBtn');
+    const sideMenu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('overlay');
+
+    if (!menuBtn || !sideMenu || !overlay) return;
+
+    menuBtn.addEventListener('click', () => {
+        sideMenu.classList.toggle('active');
+        menuBtn.classList.toggle('active');
+        overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', () => {
+        sideMenu.classList.remove('active');
+        menuBtn.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 900) {
+            sideMenu.classList.add('active');
+            menuBtn.classList.remove('active');
+            overlay.classList.remove('active');
+        } else {
+            sideMenu.classList.remove('active');
+        }
+    });
+
+    if (window.innerWidth >= 900) {
+        sideMenu.classList.add('active');
+    }
+}
+
 function renderNoteList() {
     const notes = Storage.getNotes();
     const noteListEl = document.getElementById('note-list');
+
+    if (!noteListEl) return;
 
     if (notes.length === 0) {
         noteListEl.innerHTML = '<p class="empty-tip">暂无笔记，点击上方"新建笔记"开始创作</p>';
@@ -41,16 +78,20 @@ function selectNote(id) {
     isEditing = false;
     renderNoteDetail();
     renderNoteList();
+    updateToolbar();
 }
 
 function renderNoteDetail() {
     const detailEl = document.getElementById('note-detail');
     const editorEl = document.getElementById('note-editor');
 
+    if (!detailEl || !editorEl) return;
+
     if (!currentNote) {
         detailEl.style.display = 'block';
         editorEl.style.display = 'none';
         detailEl.innerHTML = '<p class="empty-tip">请选择一个笔记或创建新笔记</p>';
+        updateToolbar();
         return;
     }
 
@@ -73,34 +114,60 @@ function renderNoteDetail() {
             <div class="note-content-display">${escapeHtml(currentNote.content).replace(/\n/g, '<br>')}</div>
         `;
     }
+    updateToolbar();
+}
+
+function updateToolbar() {
+    const toolbar = document.getElementById('toolbar');
+    if (!toolbar) return;
+
+    if (currentNote) {
+        toolbar.style.display = 'flex';
+    } else {
+        toolbar.style.display = 'none';
+    }
 }
 
 function setupEventListeners() {
-    document.getElementById('btn-new').addEventListener('click', createNewNote);
-    document.getElementById('btn-edit').addEventListener('click', () => startEditing());
-    document.getElementById('btn-save').addEventListener('click', saveCurrentNote);
-    document.getElementById('btn-cancel').addEventListener('click', cancelEditing);
-    document.getElementById('btn-delete').addEventListener('click', deleteCurrentNote);
-    document.getElementById('btn-sync').addEventListener('click', syncToGitHub);
+    const btnNew = document.getElementById('btn-new');
+    const btnEdit = document.getElementById('btn-edit');
+    const btnSave = document.getElementById('btn-save');
+    const btnCancel = document.getElementById('btn-cancel');
+    const btnDelete = document.getElementById('btn-delete');
+    const btnSync = document.getElementById('btn-sync');
+    const btnLoad = document.getElementById('btn-load');
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const btnSaveSettings = document.getElementById('btn-save-settings');
 
-    document.getElementById('btn-open-settings').addEventListener('click', openSettings);
-    document.getElementById('btn-close-settings').addEventListener('click', closeSettings);
-    document.getElementById('btn-save-settings').addEventListener('click', saveGitHubSettings);
+    if (btnNew) btnNew.addEventListener('click', createNewNote);
+    if (btnEdit) btnEdit.addEventListener('click', () => startEditing());
+    if (btnSave) btnSave.addEventListener('click', saveCurrentNote);
+    if (btnCancel) btnCancel.addEventListener('click', cancelEditing);
+    if (btnDelete) btnDelete.addEventListener('click', deleteCurrentNote);
+    if (btnSync) btnSync.addEventListener('click', syncToGitHub);
+    if (btnLoad) btnLoad.addEventListener('click', loadFromGitHub);
+    if (btnOpenSettings) btnOpenSettings.addEventListener('click', openSettings);
+    if (btnCloseSettings) btnCloseSettings.addEventListener('click', closeSettings);
+    if (btnSaveSettings) btnSaveSettings.addEventListener('click', saveGitHubSettings);
 }
 
 function createNewNote() {
-    currentNote = {
-        id: Date.now().toString(),
-        title: '新笔记',
-        content: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        synced: false
-    };
+    const newNote = Storage.createNote('新笔记', '');
+    currentNote = newNote;
     isEditing = true;
     renderNoteDetail();
     renderNoteList();
-    document.getElementById('editor-title').focus();
+    updateToolbar();
+
+    setTimeout(() => {
+        const titleInput = document.getElementById('editor-title');
+        if (titleInput) {
+            titleInput.value = '新笔记';
+            titleInput.focus();
+            titleInput.select();
+        }
+    }, 0);
 }
 
 function startEditing() {
@@ -110,8 +177,6 @@ function startEditing() {
 }
 
 function saveCurrentNote() {
-    if (!currentNote) return;
-
     const title = document.getElementById('editor-title').value.trim();
     const content = document.getElementById('editor-content').value;
 
@@ -120,35 +185,30 @@ function saveCurrentNote() {
         return;
     }
 
-    if (currentNote.id.startsWith('temp_')) {
-        Storage.createNote(title, content);
-    } else {
+    if (currentNote && currentNote.isNew) {
+        Storage.updateNote(currentNote.id, title, content);
+        currentNote.isNew = false;
+    } else if (currentNote) {
         Storage.updateNote(currentNote.id, title, content);
     }
 
     isEditing = false;
     currentNote = null;
     renderNoteList();
+    renderNoteDetail();
     updateStats();
     showToast('笔记已保存');
-
-    setTimeout(() => {
-        const notes = Storage.getNotes();
-        if (notes.length > 0) {
-            selectNote(notes[0].id);
-        } else {
-            renderNoteDetail();
-        }
-    }, 100);
 }
 
 function cancelEditing() {
-    if (currentNote && currentNote.id.startsWith('temp_')) {
+    if (currentNote && currentNote.isNew) {
+        Storage.deleteNote(currentNote.id);
         currentNote = null;
     }
     isEditing = false;
     renderNoteDetail();
     renderNoteList();
+    updateToolbar();
 }
 
 function deleteCurrentNote() {
@@ -183,8 +243,10 @@ async function syncToGitHub() {
     }
 
     const btn = document.getElementById('btn-sync');
-    btn.disabled = true;
-    btn.textContent = '同步中...';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '同步中...';
+    }
 
     try {
         const manifest = {
@@ -220,26 +282,90 @@ async function syncToGitHub() {
     } catch (error) {
         showToast('同步失败：' + error.message, 'error');
     } finally {
-        btn.disabled = false;
-        btn.textContent = '同步到 GitHub';
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '同步到 GitHub';
+        }
+    }
+}
+
+async function loadFromGitHub() {
+    if (!GitHub.isConfigured()) {
+        showToast('请先配置 GitHub 设置', 'error');
+        openSettings();
+        return;
+    }
+
+    const btn = document.getElementById('btn-load');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '加载中...';
+    }
+
+    try {
+        const files = await GitHub.listFiles('notes');
+        const jsonFiles = files.filter(f => f.name.endsWith('.json') && f.name !== 'manifest.json');
+
+        if (jsonFiles.length === 0) {
+            showToast('仓库中没有找到笔记');
+            return;
+        }
+
+        let loadedCount = 0;
+        for (const file of jsonFiles) {
+            try {
+                const content = await GitHub.getFileContent(`notes/${file.name}`);
+                const note = JSON.parse(content);
+
+                const existingNote = Storage.getNoteById(note.id);
+                if (!existingNote) {
+                    Storage.saveNotes([note, ...Storage.getNotes()]);
+                    loadedCount++;
+                }
+            } catch (e) {
+                console.error(`加载笔记 ${file.name} 失败:`, e);
+            }
+        }
+
+        renderNoteList();
+        updateStats();
+        showToast(`成功加载 ${loadedCount} 篇笔记`);
+    } catch (error) {
+        showToast('加载失败：' + error.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '从仓库加载';
+        }
     }
 }
 
 function checkGitHubConfig() {
+    const syncStatusEl = document.getElementById('sync-status');
+    if (!syncStatusEl) return;
+
     const configured = GitHub.isConfigured();
-    document.getElementById('sync-status').textContent = configured ? '已配置' : '未配置';
+    syncStatusEl.textContent = configured ? '已配置' : '未配置';
 }
 
 function openSettings() {
-    document.getElementById('settings-modal').style.display = 'flex';
+    const modal = document.getElementById('settings-modal');
+    if (!modal) return;
+
+    modal.style.display = 'flex';
     const config = GitHub.loadConfig();
-    document.getElementById('gh-token').value = config.token || '';
-    document.getElementById('gh-owner').value = config.owner || '';
-    document.getElementById('gh-repo').value = config.repo || '';
+    const tokenInput = document.getElementById('gh-token');
+    const ownerInput = document.getElementById('gh-owner');
+    const repoInput = document.getElementById('gh-repo');
+
+    if (tokenInput) tokenInput.value = config.token || '';
+    if (ownerInput) ownerInput.value = config.owner || '';
+    if (repoInput) repoInput.value = config.repo || '';
 }
 
 function closeSettings() {
-    document.getElementById('settings-modal').style.display = 'none';
+    const modal = document.getElementById('settings-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 async function saveGitHubSettings() {
@@ -266,9 +392,13 @@ async function saveGitHubSettings() {
 
 function updateStats() {
     const stats = Storage.getStats();
-    document.getElementById('stat-total').textContent = stats.total;
-    document.getElementById('stat-today').textContent = stats.todayNew;
-    document.getElementById('stat-unsynced').textContent = stats.unsynced;
+    const statTotal = document.getElementById('stat-total');
+    const statToday = document.getElementById('stat-today');
+    const statUnsynced = document.getElementById('stat-unsynced');
+
+    if (statTotal) statTotal.textContent = stats.total;
+    if (statToday) statToday.textContent = stats.todayNew;
+    if (statUnsynced) statUnsynced.textContent = stats.unsynced;
 }
 
 function formatDate(dateString) {
@@ -290,6 +420,7 @@ function escapeHtml(text) {
 
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
+    if (!toast) return;
     toast.textContent = message;
     toast.className = `toast show ${type}`;
     setTimeout(() => {
