@@ -1,0 +1,473 @@
+/* 刺客信条2 风格样式 */
+
+/* 全局样式 */
+:root {
+    --assassin-gold: #D4AF37;
+    --assassin-gold-dark: #B8860B;
+    --assassin-brown: #8B4513;
+    --assassin-brown-light: #A0522D;
+    --assassin-black: #1A1A1A;
+    --assassin-cream: #F5F5DC;
+    --assassin-paper: #F4E8D0;
+    --assassin-red: #8B0000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Times New Roman', serif;
+    background: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
+    color: var(--assassin-cream);
+    overflow-x: hidden;
+}
+
+/* 羊皮纸效果 */
+.paper-texture {
+    background: var(--assassin-paper);
+    background-image: 
+        linear-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 175, 55, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    position: relative;
+}
+
+.paper-texture::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, rgba(139, 69, 19, 0.05) 100%);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+/* 导航菜单 */
+.side-menu {
+    background: linear-gradient(180deg, var(--assassin-brown) 0%, var(--assassin-brown-light) 100%);
+    border-right: 3px solid var(--assassin-gold);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-menu.active {
+    transform: translateX(0);
+    animation: menuSlideIn 0.4s ease-out;
+}
+
+@keyframes menuSlideIn {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* 菜单按钮 */
+.menu-btn {
+    background: var(--assassin-brown);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.menu-btn:hover {
+    background: var(--assassin-brown-light);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.menu-btn span {
+    background: var(--assassin-gold);
+    transition: all 0.3s ease;
+}
+
+.menu-btn.active span {
+    background: var(--assassin-gold-dark);
+}
+
+/* 导航链接 */
+.nav-link {
+    color: var(--assassin-cream);
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.nav-link:hover::before {
+    left: 100%;
+}
+
+.nav-link:hover {
+    color: var(--assassin-gold);
+    border-left-color: var(--assassin-gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.nav-link.active {
+    color: var(--assassin-gold);
+    border-left-color: var(--assassin-gold);
+    background: rgba(212, 175, 55, 0.15);
+}
+
+/* 按钮样式 */
+.btn {
+    font-family: 'Times New Roman', serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+    transition: all 0.4s ease;
+    transform: translate(-50%, -50%);
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--assassin-gold) 0%, var(--assassin-gold-dark) 100%);
+    color: var(--assassin-black);
+    border: 2px solid var(--assassin-gold-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--assassin-gold-dark) 0%, var(--assassin-gold) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--assassin-brown) 0%, var(--assassin-brown-light) 100%);
+    color: var(--assassin-cream);
+    border: 2px solid var(--assassin-brown-light);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, var(--assassin-brown-light) 0%, var(--assassin-brown) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
+}
+
+/* 笔记卡片 */
+.note-item {
+    background: var(--assassin-paper);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.note-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.note-item:hover::before {
+    opacity: 1;
+}
+
+.note-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+    border-color: var(--assassin-gold-dark);
+}
+
+.note-item.active {
+    background: linear-gradient(135deg, var(--assassin-paper) 0%, rgba(212, 175, 55, 0.1) 100%);
+    border-color: var(--assassin-gold-dark);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    animation: notePulse 2s ease-in-out infinite;
+}
+
+@keyframes notePulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    }
+    50% {
+        box-shadow: 0 6px 16px rgba(212, 175, 55, 0.6);
+    }
+}
+
+/* 笔记详情 */
+.note-detail,
+.note-editor {
+    background: var(--assassin-paper);
+    border: 3px solid var(--assassin-gold);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.note-detail::before,
+.note-editor::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0%, rgba(139, 69, 19, 0.05) 100%);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+/* 输入框 */
+.editor-title,
+.editor-content,
+.search-input {
+    background: rgba(244, 232, 208, 0.9);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Times New Roman', serif;
+}
+
+.editor-title:focus,
+.editor-content:focus,
+.search-input:focus {
+    border-color: var(--assassin-gold-dark);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+    background: var(--assassin-paper);
+}
+
+/* 工具栏 */
+.toolbar {
+    background: linear-gradient(135deg, var(--assassin-brown) 0%, var(--assassin-brown-light) 100%);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.toolbar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+}
+
+.toolbar-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 20px;
+    color: var(--assassin-gold);
+    transition: all 0.3s ease;
+}
+
+.toolbar-btn:hover {
+    background: var(--assassin-gold);
+    color: var(--assassin-black);
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
+}
+
+/* 模态框 */
+.modal {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--assassin-paper);
+    border: 3px solid var(--assassin-gold);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+    0% {
+        transform: scale(0.8) translateY(-50px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 搜索结果 */
+.search-result-item {
+    background: linear-gradient(135deg, var(--assassin-paper) 0%, rgba(212, 175, 55, 0.1) 100%);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.search-result-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    border-color: var(--assassin-gold-dark);
+}
+
+/* 统计卡片 */
+.stat-item {
+    background: linear-gradient(135deg, var(--assassin-brown) 0%, var(--assassin-brown-light) 100%);
+    border: 2px solid var(--assassin-gold);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.stat-value {
+    color: var(--assassin-gold);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 加载动画 */
+.loading {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--assassin-gold);
+    border-radius: 50%;
+    border-top-color: var(--assassin-brown);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--assassin-brown);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--assassin-gold);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--assassin-gold-dark);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .side-menu {
+        border-right: none;
+        border-bottom: 3px solid var(--assassin-gold);
+    }
+    
+    .note-detail,
+    .note-editor {
+        border-width: 2px;
+        border-radius: 8px;
+    }
+    
+    .toolbar {
+        border-radius: 25px;
+        padding: 8px;
+    }
+    
+    .toolbar-btn {
+        padding: 8px 12px;
+    }
+}
+
+/* 页面切换动画 */
+.page-transition {
+    animation: pageFadeIn 0.5s ease-out;
+}
+
+@keyframes pageFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 刺客信条图标 */
+.assassin-icon {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.2rem;
+    color: var(--assassin-gold);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 同步状态 */
+.sync-badge {
+    background: linear-gradient(135deg, var(--assassin-gold) 0%, var(--assassin-gold-dark) 100%);
+    color: var(--assassin-black);
+    font-weight: bold;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* 标题样式 */
+h1, h2, h3, h4 {
+    color: var(--assassin-gold);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-family: 'Times New Roman', serif;
+}
+
+/* 链接样式 */
+a {
+    color: var(--assassin-gold);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: var(--assassin-gold-dark);
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}

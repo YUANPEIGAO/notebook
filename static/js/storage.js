@@ -1,13 +1,36 @@
 const STORAGE_KEY = 'my_notes_data';
 
+let notesCache = null;
+let saveTimeout = null;
+
 const Storage = {
     getNotes() {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
+        if (!notesCache) {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                notesCache = data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error('读取本地存储失败:', e);
+                notesCache = [];
+            }
+        }
+        return notesCache;
     },
 
     saveNotes(notes) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        notesCache = notes;
+        
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+        
+        saveTimeout = setTimeout(() => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            } catch (e) {
+                console.error('保存本地存储失败:', e);
+            }
+        }, 100);
     },
 
     createNote(title, content) {
@@ -83,7 +106,12 @@ const Storage = {
     },
 
     clearAll() {
-        localStorage.removeItem(STORAGE_KEY);
+        notesCache = [];
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {
+            console.error('清除本地存储失败:', e);
+        }
     }
 };
 

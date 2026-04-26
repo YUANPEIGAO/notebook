@@ -1,7 +1,78 @@
 let currentNote = null;
 let isEditing = false;
+let searchMode = 'local'; // 'local' or 'cloud'
+let searchTimeout = null;
+
+// DOM 元素缓存
+const elements = {
+    sideMenu: null,
+    mainContent: null,
+    noteList: null,
+    noteDetail: null,
+    noteEditor: null,
+    editorTitle: null,
+    editorContent: null,
+    toolbar: null,
+    btnNew: null,
+    btnEdit: null,
+    btnSave: null,
+    btnCancel: null,
+    btnDelete: null,
+    btnSync: null,
+    btnSyncNote: null,
+    btnLoad: null,
+    btnOpenSettings: null,
+    btnCloseSettings: null,
+    btnSaveSettings: null,
+    btnCancelDelete: null,
+    btnConfirmDelete: null,
+    searchInput: null,
+    btnSearchLocal: null,
+    btnSearchCloud: null,
+    searchResults: null,
+    syncStatus: null,
+    statsContainer: null,
+    settingsModal: null,
+    deleteConfirmModal: null,
+    overlay: null
+};
+
+// 初始化 DOM 元素缓存
+function initElements() {
+    elements.sideMenu = document.getElementById('sideMenu');
+    elements.mainContent = document.querySelector('.main-content');
+    elements.noteList = document.getElementById('note-list');
+    elements.noteDetail = document.getElementById('note-detail');
+    elements.noteEditor = document.getElementById('note-editor');
+    elements.editorTitle = document.getElementById('editor-title');
+    elements.editorContent = document.getElementById('editor-content');
+    elements.toolbar = document.getElementById('toolbar');
+    elements.btnNew = document.getElementById('btn-new');
+    elements.btnEdit = document.getElementById('btn-edit');
+    elements.btnSave = document.getElementById('btn-save');
+    elements.btnCancel = document.getElementById('btn-cancel');
+    elements.btnDelete = document.getElementById('btn-delete');
+    elements.btnSync = document.getElementById('btn-sync');
+    elements.btnSyncNote = document.getElementById('btn-sync-note');
+    elements.btnLoad = document.getElementById('btn-load');
+    elements.btnOpenSettings = document.getElementById('btn-open-settings');
+    elements.btnCloseSettings = document.getElementById('btn-close-settings');
+    elements.btnSaveSettings = document.getElementById('btn-save-settings');
+    elements.btnCancelDelete = document.getElementById('btn-cancel-delete');
+    elements.btnConfirmDelete = document.getElementById('btn-confirm-delete');
+    elements.searchInput = document.getElementById('search-input');
+    elements.btnSearchLocal = document.getElementById('btn-search-local');
+    elements.btnSearchCloud = document.getElementById('btn-search-cloud');
+    elements.searchResults = document.getElementById('search-results');
+    elements.syncStatus = document.getElementById('sync-status');
+    elements.statsContainer = document.getElementById('stats');
+    elements.settingsModal = document.getElementById('settings-modal');
+    elements.deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    elements.overlay = document.getElementById('overlay');
+}
 
 function initNotesApp() {
+    initElements();
     initMenuEvents();
     renderNoteList();
     updateStats();
@@ -11,63 +82,142 @@ function initNotesApp() {
 
 function initMenuEvents() {
     const menuBtn = document.getElementById('menuBtn');
-    const sideMenu = document.getElementById('sideMenu');
-    const overlay = document.getElementById('overlay');
 
-    if (!menuBtn || !sideMenu || !overlay) return;
+    if (!menuBtn || !elements.sideMenu || !elements.overlay) return;
 
     menuBtn.addEventListener('click', () => {
-        sideMenu.classList.toggle('active');
+        elements.sideMenu.classList.toggle('active');
         menuBtn.classList.toggle('active');
-        overlay.classList.toggle('active');
+        elements.overlay.classList.toggle('active');
     });
 
-    overlay.addEventListener('click', () => {
-        sideMenu.classList.remove('active');
+    elements.overlay.addEventListener('click', () => {
+        elements.sideMenu.classList.remove('active');
         menuBtn.classList.remove('active');
-        overlay.classList.remove('active');
+        elements.overlay.classList.remove('active');
     });
 
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 900) {
-            sideMenu.classList.add('active');
+            elements.sideMenu.classList.add('active');
             menuBtn.classList.remove('active');
-            overlay.classList.remove('active');
+            elements.overlay.classList.remove('active');
         } else {
-            sideMenu.classList.remove('active');
+            elements.sideMenu.classList.remove('active');
         }
     });
 
     if (window.innerWidth >= 900) {
-        sideMenu.classList.add('active');
+        elements.sideMenu.classList.add('active');
     }
 }
 
 function renderNoteList() {
     const notes = Storage.getNotes();
-    const noteListEl = document.getElementById('note-list');
-
-    if (!noteListEl) return;
+    
+    if (!elements.noteList) return;
 
     if (notes.length === 0) {
-        noteListEl.innerHTML = '<p class="empty-tip">暂无笔记，点击上方"新建笔记"开始创作</p>';
+        elements.noteList.innerHTML = '<p class="empty-tip">暂无笔记，点击上方"新建笔记"开始创作</p>';
         return;
     }
 
-    noteListEl.innerHTML = notes.map(note => `
-        <div class="note-item ${currentNote && currentNote.id === note.id ? 'active' : ''}" data-id="${note.id}">
-            <div class="note-item-title">
-                <span class="note-icon">📝</span>
-                <span class="note-title">${escapeHtml(note.title)}</span>
-                ${!note.synced ? '<span class="sync-badge">未同步</span>' : ''}
+    // 对于少量笔记，使用普通渲染
+    if (notes.length <= 50) {
+        elements.noteList.innerHTML = notes.map(note => `
+            <div class="note-item ${currentNote && currentNote.id === note.id ? 'active' : ''}" data-id="${note.id}">
+                <div class="note-item-title">
+                    <span class="note-icon">📝</span>
+                    <span class="note-title">${escapeHtml(note.title)}</span>
+                    ${!note.synced ? '<span class="sync-badge">未同步</span>' : ''}
+                </div>
+                <div class="note-item-date">${formatDate(note.updatedAt)}</div>
             </div>
-            <div class="note-item-date">${formatDate(note.updatedAt)}</div>
-        </div>
-    `).join('');
+        `).join('');
 
-    document.querySelectorAll('.note-item').forEach(item => {
-        item.addEventListener('click', () => selectNote(item.dataset.id));
-    });
+        elements.noteList.querySelectorAll('.note-item').forEach(item => {
+            item.addEventListener('click', () => selectNote(item.dataset.id));
+        });
+        return;
+    }
+
+    // 对于大量笔记，使用虚拟列表
+    renderVirtualList(notes);
+}
+
+// 虚拟列表渲染
+function renderVirtualList(notes) {
+    const noteListEl = elements.noteList;
+    const itemHeight = 80; // 每个笔记项的高度
+    const containerHeight = noteListEl.clientHeight;
+    const visibleCount = Math.ceil(containerHeight / itemHeight) + 2; // 可见项数量，加2个缓冲
+
+    // 清空容器并移除旧的滚动事件
+    if (noteListEl._scrollHandler) {
+        noteListEl.removeEventListener('scroll', noteListEl._scrollHandler);
+    }
+    noteListEl.innerHTML = '';
+    noteListEl.style.position = 'relative';
+    noteListEl.style.overflow = 'auto';
+    
+    // 创建占位元素，设置总高度
+    const placeholder = document.createElement('div');
+    placeholder.style.height = `${notes.length * itemHeight}px`;
+    placeholder.style.position = 'absolute';
+    placeholder.style.top = '0';
+    placeholder.style.left = '0';
+    placeholder.style.right = '0';
+    placeholder.style.pointerEvents = 'none';
+    noteListEl.appendChild(placeholder);
+
+    // 创建可见区域容器
+    const visibleContainer = document.createElement('div');
+    visibleContainer.style.position = 'absolute';
+    visibleContainer.style.top = '0';
+    visibleContainer.style.left = '0';
+    visibleContainer.style.right = '0';
+    noteListEl.appendChild(visibleContainer);
+
+    // 滚动事件处理
+    function handleScroll() {
+        const scrollTop = noteListEl.scrollTop;
+        const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - 1);
+        const endIndex = Math.min(notes.length, startIndex + visibleCount);
+        const visibleNotes = notes.slice(startIndex, endIndex);
+
+        // 更新可见容器位置
+        visibleContainer.style.transform = `translateY(${startIndex * itemHeight}px)`;
+
+        // 渲染可见笔记
+        visibleContainer.innerHTML = visibleNotes.map(note => `
+            <div class="note-item ${currentNote && currentNote.id === note.id ? 'active' : ''}" data-id="${note.id}" style="height: ${itemHeight}px; margin-bottom: 0;">
+                <div class="note-item-title">
+                    <span class="note-icon">📝</span>
+                    <span class="note-title">${escapeHtml(note.title)}</span>
+                    ${!note.synced ? '<span class="sync-badge">未同步</span>' : ''}
+                </div>
+                <div class="note-item-date">${formatDate(note.updatedAt)}</div>
+            </div>
+        `).join('');
+
+        // 重新绑定点击事件
+        visibleContainer.querySelectorAll('.note-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const noteId = item.dataset.id;
+                selectNote(noteId);
+            });
+        });
+    }
+
+    // 初始渲染
+    handleScroll();
+
+    // 添加滚动事件监听
+    noteListEl.addEventListener('scroll', handleScroll);
+
+    // 保存滚动处理函数，以便后续清理
+    noteListEl._scrollHandler = handleScroll;
 }
 
 function selectNote(id) {
@@ -82,28 +232,25 @@ function selectNote(id) {
 }
 
 function renderNoteDetail() {
-    const detailEl = document.getElementById('note-detail');
-    const editorEl = document.getElementById('note-editor');
-
-    if (!detailEl || !editorEl) return;
+    if (!elements.noteDetail || !elements.noteEditor) return;
 
     if (!currentNote) {
-        detailEl.style.display = 'block';
-        editorEl.style.display = 'none';
-        detailEl.innerHTML = '<p class="empty-tip">请选择一个笔记或创建新笔记</p>';
+        elements.noteDetail.style.display = 'block';
+        elements.noteEditor.style.display = 'none';
+        elements.noteDetail.innerHTML = '<p class="empty-tip">请选择一个笔记或创建新笔记</p>';
         updateToolbar();
         return;
     }
 
     if (isEditing) {
-        detailEl.style.display = 'none';
-        editorEl.style.display = 'block';
-        document.getElementById('editor-title').value = currentNote.title;
-        document.getElementById('editor-content').value = currentNote.content;
+        elements.noteDetail.style.display = 'none';
+        elements.noteEditor.style.display = 'block';
+        if (elements.editorTitle) elements.editorTitle.value = currentNote.title;
+        if (elements.editorContent) elements.editorContent.value = currentNote.content;
     } else {
-        detailEl.style.display = 'block';
-        editorEl.style.display = 'none';
-        detailEl.innerHTML = `
+        elements.noteDetail.style.display = 'block';
+        elements.noteEditor.style.display = 'none';
+        elements.noteDetail.innerHTML = `
             <div class="note-header">
                 <h2 class="note-title-display">${escapeHtml(currentNote.title)}</h2>
                 <div class="note-meta">
@@ -118,53 +265,32 @@ function renderNoteDetail() {
 }
 
 function updateToolbar() {
-    const toolbar = document.getElementById('toolbar');
-    if (!toolbar) return;
+    if (!elements.toolbar) return;
 
     if (currentNote) {
-        toolbar.style.display = 'flex';
+        elements.toolbar.style.display = 'flex';
     } else {
-        toolbar.style.display = 'none';
+        elements.toolbar.style.display = 'none';
     }
 }
 
-let searchMode = 'local'; // 'local' or 'cloud'
-let searchTimeout = null;
-
 function setupEventListeners() {
-    const btnNew = document.getElementById('btn-new');
-    const btnEdit = document.getElementById('btn-edit');
-    const btnSave = document.getElementById('btn-save');
-    const btnCancel = document.getElementById('btn-cancel');
-    const btnDelete = document.getElementById('btn-delete');
-    const btnSync = document.getElementById('btn-sync');
-    const btnSyncNote = document.getElementById('btn-sync-note');
-    const btnLoad = document.getElementById('btn-load');
-    const btnOpenSettings = document.getElementById('btn-open-settings');
-    const btnCloseSettings = document.getElementById('btn-close-settings');
-    const btnSaveSettings = document.getElementById('btn-save-settings');
-    const btnCancelDelete = document.getElementById('btn-cancel-delete');
-    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
-    const searchInput = document.getElementById('search-input');
-    const btnSearchLocal = document.getElementById('btn-search-local');
-    const btnSearchCloud = document.getElementById('btn-search-cloud');
+    if (elements.btnNew) elements.btnNew.addEventListener('click', createNewNote);
+    if (elements.btnEdit) elements.btnEdit.addEventListener('click', () => startEditing());
+    if (elements.btnSave) elements.btnSave.addEventListener('click', saveCurrentNote);
+    if (elements.btnCancel) elements.btnCancel.addEventListener('click', cancelEditing);
+    if (elements.btnDelete) elements.btnDelete.addEventListener('click', showDeleteConfirm);
+    if (elements.btnSync) elements.btnSync.addEventListener('click', syncToGitHub);
+    if (elements.btnSyncNote) elements.btnSyncNote.addEventListener('click', syncCurrentNote);
+    if (elements.btnLoad) elements.btnLoad.addEventListener('click', loadFromGitHub);
+    if (elements.btnOpenSettings) elements.btnOpenSettings.addEventListener('click', openSettings);
+    if (elements.btnCloseSettings) elements.btnCloseSettings.addEventListener('click', closeSettings);
+    if (elements.btnSaveSettings) elements.btnSaveSettings.addEventListener('click', saveGitHubSettings);
+    if (elements.btnCancelDelete) elements.btnCancelDelete.addEventListener('click', closeDeleteConfirm);
+    if (elements.btnConfirmDelete) elements.btnConfirmDelete.addEventListener('click', confirmDelete);
 
-    if (btnNew) btnNew.addEventListener('click', createNewNote);
-    if (btnEdit) btnEdit.addEventListener('click', () => startEditing());
-    if (btnSave) btnSave.addEventListener('click', saveCurrentNote);
-    if (btnCancel) btnCancel.addEventListener('click', cancelEditing);
-    if (btnDelete) btnDelete.addEventListener('click', showDeleteConfirm);
-    if (btnSync) btnSync.addEventListener('click', syncToGitHub);
-    if (btnSyncNote) btnSyncNote.addEventListener('click', syncCurrentNote);
-    if (btnLoad) btnLoad.addEventListener('click', loadFromGitHub);
-    if (btnOpenSettings) btnOpenSettings.addEventListener('click', openSettings);
-    if (btnCloseSettings) btnCloseSettings.addEventListener('click', closeSettings);
-    if (btnSaveSettings) btnSaveSettings.addEventListener('click', saveGitHubSettings);
-    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteConfirm);
-    if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', confirmDelete);
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+    if (elements.searchInput) {
+        elements.searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 handleSearch(e.target.value);
@@ -172,20 +298,30 @@ function setupEventListeners() {
         });
     }
 
-    if (btnSearchLocal) {
-        btnSearchLocal.addEventListener('click', () => {
+    if (elements.btnSearchLocal) {
+        elements.btnSearchLocal.addEventListener('click', () => {
             setSearchMode('local');
-            if (searchInput && searchInput.value) {
-                handleSearch(searchInput.value);
+            if (elements.searchInput && elements.searchInput.value) {
+                handleSearch(elements.searchInput.value);
             }
         });
     }
 
-    if (btnSearchCloud) {
-        btnSearchCloud.addEventListener('click', () => {
+    if (elements.btnSearchCloud) {
+        elements.btnSearchCloud.addEventListener('click', () => {
             setSearchMode('cloud');
-            if (searchInput && searchInput.value) {
-                handleSearch(searchInput.value);
+            if (elements.searchInput && elements.searchInput.value) {
+                handleSearch(elements.searchInput.value);
+            }
+        });
+    }
+
+    if (elements.noteList) {
+        elements.noteList.addEventListener('click', (e) => {
+            const noteItem = e.target.closest('.note-item');
+            if (noteItem) {
+                const noteId = noteItem.dataset.id;
+                selectNote(noteId);
             }
         });
     }
@@ -193,16 +329,14 @@ function setupEventListeners() {
 
 function setSearchMode(mode) {
     searchMode = mode;
-    const btnSearchLocal = document.getElementById('btn-search-local');
-    const btnSearchCloud = document.getElementById('btn-search-cloud');
 
-    if (btnSearchLocal && btnSearchCloud) {
+    if (elements.btnSearchLocal && elements.btnSearchCloud) {
         if (mode === 'local') {
-            btnSearchLocal.classList.add('btn-search-active');
-            btnSearchCloud.classList.remove('btn-search-active');
+            elements.btnSearchLocal.classList.add('btn-search-active');
+            elements.btnSearchCloud.classList.remove('btn-search-active');
         } else {
-            btnSearchCloud.classList.add('btn-search-active');
-            btnSearchLocal.classList.remove('btn-search-active');
+            elements.btnSearchCloud.classList.add('btn-search-active');
+            elements.btnSearchLocal.classList.remove('btn-search-active');
         }
     }
 }
@@ -239,10 +373,9 @@ function searchLocal(query) {
 }
 
 async function searchCloud(query) {
-    const searchResultsEl = document.getElementById('search-results');
-    if (searchResultsEl) {
-        searchResultsEl.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:10px;">🔍 正在搜索云端笔记...</p>';
-        searchResultsEl.style.display = 'block';
+    if (elements.searchResults) {
+        elements.searchResults.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:10px;">🔍 正在搜索云端笔记...</p>';
+        elements.searchResults.style.display = 'block';
     }
 
     try {
@@ -250,19 +383,28 @@ async function searchCloud(query) {
         const jsonFiles = files.filter(f => f.name.endsWith('.json'));
         const lowerQuery = query.toLowerCase();
 
+        // 并行获取所有文件内容
+        const fileContents = await Promise.all(
+            jsonFiles.map(async (file) => {
+                try {
+                    const content = await GitHub.getFileContent(`note/${file.name}`);
+                    return { file, content };
+                } catch (e) {
+                    console.error(`获取云端笔记 ${file.name} 失败:`, e);
+                    return null;
+                }
+            })
+        );
+
         const results = [];
 
-        for (const file of jsonFiles) {
+        // 处理获取到的内容
+        for (const item of fileContents) {
+            if (!item) continue;
+
             try {
-                const content = await GitHub.getFileContent(`note/${file.name}`);
-                let noteData;
-                try {
-                    noteData = JSON.parse(content);
-                } catch (e) {
-                    console.error(`解析云端笔记 ${file.name} 失败:`, e);
-                    continue;
-                }
-                const noteId = noteData.id || file.name.replace('.json', '');
+                const noteData = JSON.parse(item.content);
+                const noteId = noteData.id || item.file.name.replace('.json', '');
 
                 const titleMatch = (noteData.title || '').toLowerCase().includes(lowerQuery);
                 const contentMatch = (noteData.content || '').toLowerCase().includes(lowerQuery);
@@ -276,7 +418,7 @@ async function searchCloud(query) {
                     });
                 }
             } catch (e) {
-                console.error('解析云端笔记失败:', e);
+                console.error(`解析云端笔记 ${item.file.name} 失败:`, e);
             }
         }
 
@@ -284,24 +426,23 @@ async function searchCloud(query) {
     } catch (error) {
         console.error('搜索云端笔记失败:', error);
         showToast('搜索云端失败，请检查 GitHub 配置', 'error');
-        if (searchResultsEl) {
-            searchResultsEl.innerHTML = '';
-            searchResultsEl.style.display = 'none';
+        if (elements.searchResults) {
+            elements.searchResults.innerHTML = '';
+            elements.searchResults.style.display = 'none';
         }
     }
 }
 
 function renderSearchResults(results) {
-    const searchResultsEl = document.getElementById('search-results');
-    if (!searchResultsEl) return;
+    if (!elements.searchResults) return;
 
     if (results.length === 0) {
-        searchResultsEl.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:10px;">未找到匹配的笔记</p>';
-        searchResultsEl.style.display = 'block';
+        elements.searchResults.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:10px;">未找到匹配的笔记</p>';
+        elements.searchResults.style.display = 'block';
         return;
     }
 
-    searchResultsEl.innerHTML = results.map(result => `
+    elements.searchResults.innerHTML = results.map(result => `
         <div class="search-result-item" data-id="${result.id}" data-source="${result.source}">
             <span class="search-result-source">${result.source === 'local' ? '📁 本地' : '☁️ 云端'}</span>
             <div class="search-result-title">${escapeHtml(result.title)}</div>
@@ -309,9 +450,9 @@ function renderSearchResults(results) {
         </div>
     `).join('');
 
-    searchResultsEl.style.display = 'block';
+    elements.searchResults.style.display = 'block';
 
-    document.querySelectorAll('.search-result-item').forEach(item => {
+    elements.searchResults.querySelectorAll('.search-result-item').forEach(item => {
         item.addEventListener('click', () => handleSearchResultClick(item));
     });
 }
@@ -368,10 +509,9 @@ async function loadCloudNoteById(id) {
 }
 
 function clearSearchResults() {
-    const searchResultsEl = document.getElementById('search-results');
-    if (searchResultsEl) {
-        searchResultsEl.innerHTML = '';
-        searchResultsEl.style.display = 'none';
+    if (elements.searchResults) {
+        elements.searchResults.innerHTML = '';
+        elements.searchResults.style.display = 'none';
     }
 }
 
@@ -631,89 +771,106 @@ async function loadFromGitHub() {
         let loadedCount = 0;
         const processedIds = new Set();
 
-        // 处理新的 JSON 格式
-        for (const jsonFile of jsonFiles) {
-            try {
-                const noteId = jsonFile.name.replace('.json', '');
-                const jsonContent = await GitHub.getFileContent(`note/${jsonFile.name}`);
-                let noteData;
+        // 处理新的 JSON 格式 - 并行获取
+        const jsonResults = await Promise.all(
+            jsonFiles.map(async (jsonFile) => {
                 try {
-                    noteData = JSON.parse(jsonContent);
+                    const noteId = jsonFile.name.replace('.json', '');
+                    const jsonContent = await GitHub.getFileContent(`note/${jsonFile.name}`);
+                    const noteData = JSON.parse(jsonContent);
+                    return { noteId, noteData };
                 } catch (e) {
-                    console.error(`解析笔记 ${jsonFile.name} 失败:`, e);
-                    continue;
+                    console.error(`处理笔记 ${jsonFile.name} 失败:`, e);
+                    return null;
                 }
+            })
+        );
 
-                const existingNote = Storage.getNoteById(noteId);
-                if (!existingNote) {
-                    const finalNoteId = noteData.id || noteId;
-                    const existingByDataId = noteData.id ? Storage.getNoteById(noteData.id) : null;
-                    
-                    if (existingByDataId) {
-                        console.log(`笔记 ${noteId} (${noteData.id}) 已存在，跳过`);
-                    } else {
-                        const newNote = {
-                            id: finalNoteId,
-                            title: noteData.title || '未命名',
-                            content: noteData.content || '',
-                            createdAt: noteData.createdAt || new Date().toISOString(),
-                            updatedAt: noteData.updatedAt || new Date().toISOString(),
-                            synced: true
-                        };
-                        Storage.addNote(newNote);
-                        loadedCount++;
-                        processedIds.add(finalNoteId);
-                    }
+        // 处理 JSON 结果
+        for (const result of jsonResults) {
+            if (!result) continue;
+
+            const { noteId, noteData } = result;
+            const existingNote = Storage.getNoteById(noteId);
+            if (!existingNote) {
+                const finalNoteId = noteData.id || noteId;
+                const existingByDataId = noteData.id ? Storage.getNoteById(noteData.id) : null;
+                
+                if (existingByDataId) {
+                    console.log(`笔记 ${noteId} (${noteData.id}) 已存在，跳过`);
                 } else {
-                    console.log(`笔记 ${noteId} 已存在，跳过`);
-                    processedIds.add(noteId);
+                    const newNote = {
+                        id: finalNoteId,
+                        title: noteData.title || '未命名',
+                        content: noteData.content || '',
+                        createdAt: noteData.createdAt || new Date().toISOString(),
+                        updatedAt: noteData.updatedAt || new Date().toISOString(),
+                        synced: true
+                    };
+                    Storage.addNote(newNote);
+                    loadedCount++;
+                    processedIds.add(finalNoteId);
                 }
-            } catch (e) {
-                console.error(`加载笔记 ${jsonFile.name} 失败:`, e);
+            } else {
+                console.log(`笔记 ${noteId} 已存在，跳过`);
+                processedIds.add(noteId);
             }
         }
 
-        // 处理旧的 TXT 格式 (向后兼容)
+        // 处理旧的 TXT 格式 (向后兼容) - 并行获取
         const txtFiles = files.filter(f => f.name.endsWith('_title.txt'));
         console.log('找到旧格式 TXT 文件:', txtFiles);
 
-        for (const titleFile of txtFiles) {
-            try {
-                const noteId = titleFile.name.replace('_title.txt', '');
-                if (processedIds.has(noteId)) {
-                    console.log(`笔记 ${noteId} 已从 JSON 加载，跳过 TXT`);
-                    continue;
-                }
-
-                const existingNote = Storage.getNoteById(noteId);
-                if (existingNote) {
-                    console.log(`笔记 ${noteId} 已存在，跳过`);
-                    continue;
-                }
-
-                const title = await GitHub.getFileContent(`note/${titleFile.name}`);
-                let content = '';
-                
+        const txtResults = await Promise.all(
+            txtFiles.map(async (titleFile) => {
                 try {
-                    content = await GitHub.getFileContent(`note/${noteId}_content.txt`);
-                } catch (e) {
-                    console.log(`笔记 ${noteId} 没有内容文件`);
-                }
+                    const noteId = titleFile.name.replace('_title.txt', '');
+                    if (processedIds.has(noteId)) {
+                        return { noteId, skip: true, reason: '已从 JSON 加载' };
+                    }
 
-                const newNote = {
-                    id: noteId,
-                    title: title || '未命名',
-                    content: content || '',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    synced: true
-                };
-                Storage.addNote(newNote);
-                loadedCount++;
-                console.log(`从 TXT 加载笔记: ${noteId}`);
-            } catch (e) {
-                console.error(`加载旧格式笔记 ${titleFile.name} 失败:`, e);
+                    const existingNote = Storage.getNoteById(noteId);
+                    if (existingNote) {
+                        return { noteId, skip: true, reason: '已存在' };
+                    }
+
+                    const title = await GitHub.getFileContent(`note/${titleFile.name}`);
+                    let content = '';
+                    
+                    try {
+                        content = await GitHub.getFileContent(`note/${noteId}_content.txt`);
+                    } catch (e) {
+                        console.log(`笔记 ${noteId} 没有内容文件`);
+                    }
+
+                    return { noteId, title, content, skip: false };
+                } catch (e) {
+                    console.error(`处理旧格式笔记 ${titleFile.name} 失败:`, e);
+                    return null;
+                }
+            })
+        );
+
+        // 处理 TXT 结果
+        for (const result of txtResults) {
+            if (!result || result.skip) {
+                if (result && result.reason) {
+                    console.log(`笔记 ${result.noteId} 跳过: ${result.reason}`);
+                }
+                continue;
             }
+
+            const newNote = {
+                id: result.noteId,
+                title: result.title || '未命名',
+                content: result.content || '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                synced: true
+            };
+            Storage.addNote(newNote);
+            loadedCount++;
+            console.log(`从 TXT 加载笔记: ${result.noteId}`);
         }
 
         renderNoteList();
