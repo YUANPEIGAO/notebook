@@ -226,14 +226,17 @@ export async function saveGitHubSettings() {
         return;
     }
     
+    // 先保存配置
     GitHub.saveConfig({ token, owner, repo, branch });
+    showToast('配置已保存');
     
+    // 然后测试连接
     try {
         await GitHub.testConnection();
         showToast('GitHub 连接测试成功');
         closeSettings();
         if (window.checkGitHubConfig) window.checkGitHubConfig();
     } catch (error) {
-        showToast('连接失败：' + error.message, 'error');
+        showToast('连接测试失败：' + error.message, 'error');
     }
 }

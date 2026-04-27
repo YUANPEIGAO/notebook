@@ -38,10 +38,12 @@ function openSettings() {
     const tokenInput = document.getElementById('gh-token');
     const ownerInput = document.getElementById('gh-owner');
     const repoInput = document.getElementById('gh-repo');
+    const branchInput = document.getElementById('gh-branch');
 
     if (tokenInput) tokenInput.value = config.token || '';
     if (ownerInput) ownerInput.value = config.owner || '';
     if (repoInput) repoInput.value = config.repo || '';
+    if (branchInput) branchInput.value = config.branch || 'main';
 }
 
 function closeSettings() {
@@ -55,6 +57,7 @@ async function saveGitHubSettings() {
     const tokenInput = document.getElementById('gh-token');
     const ownerInput = document.getElementById('gh-owner');
     const repoInput = document.getElementById('gh-repo');
+    const branchInput = document.getElementById('gh-branch');
 
     if (!tokenInput || !ownerInput || !repoInput) {
         showToast('设置表单元素不存在', 'error');
@@ -64,21 +67,25 @@ async function saveGitHubSettings() {
     const token = tokenInput.value.trim();
     const owner = ownerInput.value.trim();
     const repo = repoInput.value.trim();
+    const branch = branchInput ? branchInput.value.trim() || 'main' : 'main';
 
     if (!token || !owner || !repo) {
         showToast('请填写完整的 GitHub 配置信息', 'error');
         return;
     }
 
-    GitHub.saveConfig({ token, owner, repo });
+    // 先保存配置
+    GitHub.saveConfig({ token, owner, repo, branch });
+    showToast('配置已保存');
 
+    // 然后测试连接
     try {
         await GitHub.testConnection();
         showToast('GitHub 连接测试成功');
         closeSettings();
         checkGitHubConfig();
     } catch (error) {
-        showToast('连接失败：' + error.message, 'error');
+        showToast('连接测试失败：' + error.message, 'error');
     }
 }
 
@@ -88,14 +95,4 @@ function checkGitHubConfig() {
 
     const configured = GitHub.isConfigured();
     syncStatusEl.textContent = configured ? '已配置' : '未配置';
-}
-
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.textContent = message;
-    toast.className = `toast show ${type}`;
-    setTimeout(() => {
-        toast.className = 'toast';
-    }, 3000);
 }
