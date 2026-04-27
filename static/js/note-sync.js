@@ -76,9 +76,7 @@ export async function syncAllNotes() {
                             JSON.stringify(noteData, null, 2),
                             `Update note: ${note.title}`
                         );
-                        // 使用正确的参数格式调用updateNote
-                        Storage.updateNote(note.id, note.title, note.content);
-                        // 然后标记为已同步
+                        // 直接标记为已同步，不需要先调用updateNote
                         Storage.markAsSynced(note.id, true);
                     } catch (error) {
                         console.error(`同步笔记 ${note.title} 失败:`, error);
@@ -142,7 +140,8 @@ export async function loadFromGitHub() {
                             const cloudUpdated = new Date(noteData.updatedAt);
                             
                             if (cloudUpdated > localUpdated) {
-                                Storage.updateNote({ ...noteData, synced: true });
+                                Storage.updateNote(noteData.id, noteData.title, noteData.content);
+                                Storage.markAsSynced(noteData.id, true);
                                 return true;
                             }
                         } else {

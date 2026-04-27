@@ -1,9 +1,11 @@
-const STORAGE_KEY = 'my_notes_data';
+import { STORAGE_KEYS } from './constants.js';
+
+const STORAGE_KEY = STORAGE_KEYS.NOTES;
 
 let notesCache = null;
 let saveTimeout = null;
 
-const Storage = {
+export const Storage = {
     getNotes() {
         if (!notesCache) {
             try {
@@ -114,7 +116,3 @@ const Storage = {
         }
     }
 };
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Storage;
-}

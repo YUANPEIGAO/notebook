@@ -1,4 +1,6 @@
 import { initMenuEvents } from './menu.js';
+import { GitHub } from './github.js';
+import { showToast } from './utils/helpers.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initMenuEvents();

@@ -1,6 +1,6 @@
 import { STORAGE_KEYS, GITHUB_DEFAULTS, API_ENDPOINTS } from './constants.js';
 
-const GitHub = {
+export const GitHub = {
     config: {
         token: '',
         owner: '',
@@ -177,6 +177,3 @@ const GitHub = {
     }
 };
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GitHub;
-}
