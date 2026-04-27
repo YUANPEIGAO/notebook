@@ -33,16 +33,16 @@ const Storage = {
         }, 100);
     },
 
-    createNote(title, content) {
+    createNote(title, content, id, createdAt, updatedAt, synced) {
         const notes = this.getNotes();
         const newNote = {
-            id: Date.now().toString(),
+            id: id || Date.now().toString(),
             title: title || '无标题笔记',
             content: content || '',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            synced: false,
-            isNew: true
+            createdAt: createdAt || new Date().toISOString(),
+            updatedAt: updatedAt || new Date().toISOString(),
+            synced: synced || false,
+            isNew: !id
         };
         notes.unshift(newNote);
         this.saveNotes(notes);

@@ -1,5 +1,5 @@
 import { showToast } from './utils/helpers.js';
-import { getCurrentNote, setCurrentNote, setEditing } from './note.js';
+import { getCurrentNote, setCurrentNote, setEditing, isEditing } from './note.js';
 import * as Storage from './storage.js';
 import * as GitHub from './github.js';
 import { openSettings } from './note-sync.js';
@@ -201,7 +201,6 @@ export function renderNoteDetail() {
     if (!elements.noteDetail || !elements.noteEditor) return;
 
     const currentNote = getCurrentNote();
-    const isEditing = window.isEditing;
 
     if (!currentNote) {
         elements.noteDetail.style.display = 'block';

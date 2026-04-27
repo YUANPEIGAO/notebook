@@ -69,7 +69,7 @@ function initElements() {
     elements.syncStatus = document.getElementById('sync-status');
     elements.statsContainer = document.getElementById('stats');
     elements.settingsModal = document.getElementById('settings-modal');
-    elements.deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    elements.deleteConfirmModal = document.getElementById('delete-modal');
     elements.overlay = document.getElementById('overlay');
 }
 

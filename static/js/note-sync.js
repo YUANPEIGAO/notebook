@@ -64,8 +64,22 @@ export async function syncAllNotes() {
             await Promise.all(
                 batch.map(async (note) => {
                     try {
-                        await GitHub.syncNote(note);
-                        Storage.updateNote({ ...note, synced: true });
+                        const noteData = {
+                            id: note.id,
+                            title: note.title,
+                            content: note.content,
+                            createdAt: note.createdAt,
+                            updatedAt: note.updatedAt
+                        };
+                        await GitHub.uploadFile(
+                            `note/${note.id}.json`,
+                            JSON.stringify(noteData, null, 2),
+                            `Update note: ${note.title}`
+                        );
+                        // 使用正确的参数格式调用updateNote
+                        Storage.updateNote(note.id, note.title, note.content);
+                        // 然后标记为已同步
+                        Storage.markAsSynced(note.id, true);
                     } catch (error) {
                         console.error(`同步笔记 ${note.title} 失败:`, error);
                     }
@@ -121,7 +135,7 @@ export async function loadFromGitHub() {
                         const noteData = JSON.parse(content);
                         
                         // 检查本地是否已存在
-                        const existingNote = Storage.getNote(noteData.id);
+                        const existingNote = Storage.getNoteById(noteData.id);
                         if (existingNote) {
                             // 比较更新时间，使用较新的版本
                             const localUpdated = new Date(existingNote.updatedAt);
