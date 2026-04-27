@@ -93,6 +93,9 @@
                 <label for="gh-token">Personal Access Token</label>
                 <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
                 <small>在 GitHub Settings → Developer settings → Personal access tokens 生成</small>
+                <div class="security-warning">
+                    ⚠️ <strong>安全提醒：</strong>请使用最小权限令牌，只需要 <code>repo</code> 权限即可。Token 会明文存储在本地，请注意保护你的设备安全。
+                </div>
             </div>
             <div class="form-group">
                 <label for="gh-owner">仓库所有者（用户名）</label>

@@ -1,15 +1,15 @@
-const GITHUB_CONFIG_KEY = 'github_config';
+import { STORAGE_KEYS, GITHUB_DEFAULTS, API_ENDPOINTS } from './constants.js';
 
 const GitHub = {
     config: {
         token: '',
         owner: '',
         repo: '',
-        branch: 'main'
+        branch: GITHUB_DEFAULTS.BRANCH
     },
 
     loadConfig() {
-        const saved = localStorage.getItem(GITHUB_CONFIG_KEY);
+        const saved = localStorage.getItem(STORAGE_KEYS.GITHUB_CONFIG);
         if (saved) {
             this.config = { ...this.config, ...JSON.parse(saved) };
         }
@@ -18,7 +18,7 @@ const GitHub = {
 
     saveConfig(config) {
         this.config = { ...this.config, ...config };
-        localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(this.config));
+        localStorage.setItem(STORAGE_KEYS.GITHUB_CONFIG, JSON.stringify(this.config));
     },
 
     isConfigured() {
@@ -27,7 +27,7 @@ const GitHub = {
     },
 
     async checkFileExists(path) {
-        const url = `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
+        const url = `${API_ENDPOINTS.GITHUB_API}/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -45,7 +45,7 @@ const GitHub = {
 
     async uploadFile(path, content, message) {
         const sha = await this.checkFileExists(path);
-        const url = `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
+        const url = `${API_ENDPOINTS.GITHUB_API}/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
 
         const body = {
             message: message || `Update ${path}`,
@@ -81,7 +81,7 @@ const GitHub = {
             return { success: true, message: '文件不存在，无需删除' };
         }
 
-        const url = `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
+        const url = `${API_ENDPOINTS.GITHUB_API}/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
 
         const response = await fetch(url, {
             method: 'DELETE',
@@ -106,7 +106,7 @@ const GitHub = {
     },
 
     async getFileContent(path) {
-        const url = `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${path}?ref=${this.config.branch}`;
+        const url = `${API_ENDPOINTS.GITHUB_API}/repos/${this.config.owner}/${this.config.repo}/contents/${path}?ref=${this.config.branch}`;
 
         const response = await fetch(url, {
             method: 'GET',
@@ -129,7 +129,7 @@ const GitHub = {
     },
 
     async listFiles(path = '') {
-        const url = `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${path}?ref=${this.config.branch}`;
+        const url = `${API_ENDPOINTS.GITHUB_API}/repos/${this.config.owner}/${this.config.repo}/contents/${path}?ref=${this.config.branch}`;
 
         const response = await fetch(url, {
             method: 'GET',
@@ -159,7 +159,7 @@ const GitHub = {
             throw new Error('请先配置 GitHub 信息');
         }
 
-        const url = `https://api.github.com/repos/${this.config.owner}/${this.config.repo}`;
+        const url = `${API_ENDPOINTS.GITHUB_API}/repos/${this.config.owner}/${this.config.repo}`;
 
         const response = await fetch(url, {
             method: 'GET',

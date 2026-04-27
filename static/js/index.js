@@ -1,42 +1,10 @@
+import { initMenuEvents } from './menu.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     initMenuEvents();
     initSettingsEvents();
     checkGitHubConfig();
 });
-
-function initMenuEvents() {
-    const menuBtn = document.getElementById('menuBtn');
-    const sideMenu = document.getElementById('sideMenu');
-    const overlay = document.getElementById('overlay');
-
-    if (!menuBtn || !sideMenu || !overlay) return;
-
-    menuBtn.addEventListener('click', () => {
-        sideMenu.classList.toggle('active');
-        menuBtn.classList.toggle('active');
-        overlay.classList.toggle('active');
-    });
-
-    overlay.addEventListener('click', () => {
-        sideMenu.classList.remove('active');
-        menuBtn.classList.remove('active');
-        overlay.classList.remove('active');
-    });
-
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 900) {
-            sideMenu.classList.add('active');
-            menuBtn.classList.remove('active');
-            overlay.classList.remove('active');
-        } else {
-            sideMenu.classList.remove('active');
-        }
-    });
-
-    if (window.innerWidth >= 900) {
-        sideMenu.classList.add('active');
-    }
-}
 
 function initSettingsEvents() {
     const btnOpenSettings = document.getElementById('btn-open-settings');

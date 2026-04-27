@@ -7,35 +7,53 @@
 }
 
 .tool-section {
-    background: white;
+    background: rgba(5, 15, 30, 0.75);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(0, 229, 255, 0.2);
     padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
 }
 
 .tool-section h2 {
-    color: #2c3e50;
+    color: #00e5ff;
     margin-bottom: 10px;
+    font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.tool-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: #00e5ff;
 }
 
 .section-desc {
-    color: #7f8c8d;
+    color: #80deea;
     margin-bottom: 20px;
     font-size: 0.95rem;
 }
 
 .upload-area {
-    border: 2px dashed #bdc3c7;
+    border: 2px dashed rgba(0, 229, 255, 0.3);
     border-radius: 8px;
     padding: 40px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    background: rgba(0, 229, 255, 0.05);
 }
 
 .upload-area:hover {
-    border-color: #3498db;
-    background: #f8f9fa;
+    border-color: #00e5ff;
+    background: rgba(0, 229, 255, 0.08);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
 }
 
 .upload-content {
@@ -47,6 +65,7 @@
 
 .upload-icon {
     font-size: 3rem;
+    color: #00e5ff;
 }
 
 .ocr-preview {
@@ -58,6 +77,8 @@
     max-width: 100%;
     max-height: 300px;
     border-radius: 8px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
 }
 
 .ocr-result {
@@ -80,59 +101,49 @@
 #ai-action-select {
     flex: 1;
     min-width: 150px;
-    padding: 10px;
-    border: 2px solid #eee;
-    border-radius: 8px;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+    background: transparent;
+    color: #e0f7fa;
     font-size: 1rem;
+    font-family: 'Noto Sans SC', 'Rajdhani', sans-serif;
+    transition: all 0.2s ease;
 }
 
 #ai-action-select:focus {
     outline: none;
-    border-color: #3498db;
+    border-bottom-color: #00e5ff;
+    box-shadow: 0 1px 0 rgba(0, 229, 255, 0.5);
+}
+
+#ai-action-select option {
+    background: #020d1a;
+    color: #e0f7fa;
 }
 
 textarea {
     width: 100%;
     padding: 12px;
-    border: 2px solid #eee;
-    border-radius: 8px;
+    border: none;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+    background: transparent;
+    color: #e0f7fa;
     font-size: 1rem;
-    font-family: inherit;
+    font-family: 'Noto Sans SC', 'Rajdhani', sans-serif;
     resize: vertical;
     min-height: 120px;
+    transition: all 0.2s ease;
 }
 
 textarea:focus {
     outline: none;
-    border-color: #3498db;
+    border-bottom-color: #00e5ff;
+    box-shadow: 0 1px 0 rgba(0, 229, 255, 0.5);
 }
 
-.btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: all 0.3s;
-}
-
-.btn-primary {
-    background: #3498db;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #2980b9;
-}
-
-.btn-secondary {
-    background: #ecf0f1;
-    color: #2c3e50;
-}
-
-.btn-secondary:hover {
-    background: #bdc3c7;
+textarea::placeholder {
+    color: rgba(128, 222, 234, 0.5);
 }
 
 @media (max-width: 480px) {
@@ -142,5 +153,13 @@ textarea:focus {
 
     .upload-area {
         padding: 25px;
+    }
+
+    .ai-actions {
+        flex-direction: column;
+    }
+
+    #ai-action-select {
+        width: 100%;
     }
 }
