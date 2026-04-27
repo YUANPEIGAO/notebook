@@ -170,12 +170,7 @@ export const GitHub = {
         });
 
         if (!response.ok) {
-            try {
-                const errorData = await response.json();
-                throw new Error(`连接失败: ${errorData.message || '未知错误'}`);
-            } catch (e) {
-                throw new Error(`连接失败，请检查 Token 和仓库信息 (HTTP ${response.status})`);
-            }
+            throw new Error('连接失败，请检查 Token 和仓库信息');
         }
 
         return await response.json();
