@@ -137,7 +137,7 @@ async function loadModules() {
             { initEditElements, initEditEvents, selectNote, renderNoteDetail, updateToolbar, createNewNote, startEditing, saveCurrentNote, cancelEditing, showDeleteConfirm, closeDeleteConfirm, confirmDelete, syncCurrentNote },
             { initListElements, initListEvents, renderNoteList, updateStats, checkGitHubConfig },
             { initSearchElements, initSearchEvents },
-            { initSyncElements, initSyncEvents, syncToGitHub, loadFromGitHub, openSettings, closeSettings, saveGitHubSettings }
+            { initSyncElements, initSyncEvents, syncAllNotes, loadFromGitHub, openSettings, closeSettings, saveGitHubSettings }
         ] = await Promise.all([
             import('./note-edit.js'),
             import('./note-list.js'),
@@ -175,7 +175,7 @@ async function loadModules() {
         if (elements.btnSave) elements.btnSave.addEventListener('click', saveCurrentNote);
         if (elements.btnCancel) elements.btnCancel.addEventListener('click', cancelEditing);
         if (elements.btnDelete) elements.btnDelete.addEventListener('click', showDeleteConfirm);
-        if (elements.btnSync) elements.btnSync.addEventListener('click', syncToGitHub);
+        if (elements.btnSync) elements.btnSync.addEventListener('click', syncAllNotes);
         if (elements.btnSyncNote) elements.btnSyncNote.addEventListener('click', syncCurrentNote);
         if (elements.btnLoad) elements.btnLoad.addEventListener('click', loadFromGitHub);
         if (elements.btnOpenSettings) elements.btnOpenSettings.addEventListener('click', openSettings);
