@@ -2,8 +2,48 @@ import { initMenuEvents } from './menu.js';
 import { showToast } from './utils/helpers.js';
 
 // 全局变量
-export let currentNote = null;
-export let isEditing = false;
+let currentNote = null;
+let isEditing = false;
+
+/**
+ * 获取当前编辑状态
+ * @returns {boolean} 编辑状态
+ */
+export function getEditing() {
+    return isEditing;
+}
+
+/**
+ * 获取当前选中的笔记
+ * @returns {Object|null} 当前选中的笔记
+ */
+export function getCurrentNote() {
+    return currentNote;
+}
+
+/**
+ * 设置当前选中的笔记
+ * @param {Object} note - 笔记对象
+ */
+export function setCurrentNote(note) {
+    currentNote = note;
+}
+
+/**
+ * 设置编辑状态
+ * @param {boolean} status - 编辑状态
+ */
+export function setEditing(status) {
+    isEditing = status;
+}
+
+/**
+ * 获取 DOM 元素
+ * @returns {Object} DOM 元素对象
+ */
+export function getElements() {
+    return elements;
+}
 
 // DOM 元素缓存
 const elements = {
@@ -148,38 +188,6 @@ async function loadModules() {
         console.error('加载模块失败:', error);
         showToast('应用初始化失败', 'error');
     }
-}
-
-/**
- * 获取当前选中的笔记
- * @returns {Object|null} 当前选中的笔记
- */
-export function getCurrentNote() {
-    return currentNote;
-}
-
-/**
- * 设置当前选中的笔记
- * @param {Object} note - 笔记对象
- */
-export function setCurrentNote(note) {
-    currentNote = note;
-}
-
-/**
- * 设置编辑状态
- * @param {boolean} status - 编辑状态
- */
-export function setEditing(status) {
-    isEditing = status;
-}
-
-/**
- * 获取 DOM 元素
- * @returns {Object} DOM 元素对象
- */
-export function getElements() {
-    return elements;
 }
 
 // 初始化应用
