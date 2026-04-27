@@ -1,7 +1,7 @@
 import { showToast } from './utils/helpers.js';
 import { getCurrentNote } from './note.js';
-import * as Storage from './storage.js';
-import * as GitHub from './github.js';
+import { Storage } from './storage.js';
+import { GitHub } from './github.js';
 
 // 笔记列表相关功能
 

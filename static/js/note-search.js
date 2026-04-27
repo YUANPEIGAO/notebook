@@ -1,6 +1,6 @@
 import { showToast } from './utils/helpers.js';
-import * as Storage from './storage.js';
-import * as GitHub from './github.js';
+import { Storage } from './storage.js';
+import { GitHub } from './github.js';
 
 // 搜索相关功能
 

@@ -1,7 +1,7 @@
 import { showToast } from './utils/helpers.js';
 import { getCurrentNote, setCurrentNote, setEditing, getEditing } from './note.js';
-import * as Storage from './storage.js';
-import * as GitHub from './github.js';
+import { Storage } from './storage.js';
+import { GitHub } from './github.js';
 import { openSettings } from './note-sync.js';
 
 // 笔记编辑相关功能
