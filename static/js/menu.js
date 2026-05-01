@@ -38,4 +38,51 @@ export function initMenuEvents(options = {}) {
     if (window.innerWidth >= 900) {
         sideMenu.classList.add('active');
     }
+
+    // 初始化 DNA 高亮指示器
+    initDnaHighlighter();
+}
+
+/**
+ * 初始化 DNA 高亮指示器联动
+ */
+function initDnaHighlighter() {
+    const highlighter = document.getElementById('dnaHighlighter');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    if (!highlighter || navLinks.length === 0) return;
+
+    // 初始化高亮位置
+    updateHighlighterPosition();
+
+    // 添加导航链接点击事件
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            // 更新高亮位置
+            updateHighlighterPosition();
+        });
+    });
+}
+
+/**
+ * 更新 DNA 高亮指示器位置
+ */
+function updateHighlighterPosition() {
+    const highlighter = document.getElementById('dnaHighlighter');
+    const activeLink = document.querySelector('.nav-link.active');
+
+    if (!highlighter || !activeLink) return;
+
+    // 获取活动链接的位置
+    const linkRect = activeLink.getBoundingClientRect();
+    const sideMenu = document.getElementById('sideMenu');
+    const menuRect = sideMenu.getBoundingClientRect();
+
+    // 计算相对位置
+    const relativeTop = linkRect.top - menuRect.top;
+    const linkHeight = linkRect.height;
+    
+    // 设置高亮器位置（居中对齐）
+    const highlighterTop = relativeTop + (linkHeight - 36) / 2;
+    highlighter.style.top = highlighterTop + 'px';
 }
