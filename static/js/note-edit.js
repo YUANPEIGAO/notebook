@@ -36,11 +36,10 @@ export function createNewNote() {
     setTimeout(() => {
         const titleInput = document.getElementById('editor-title');
         if (titleInput) {
-            titleInput.value = '新笔记';
             titleInput.focus();
             titleInput.select();
         }
-    }, 0);
+    }, 50);
 }
 
 /**
@@ -61,7 +60,7 @@ export function saveCurrentNote() {
     const content = document.getElementById('editor-content').value;
 
     if (!title) {
-        alert('请输入笔记标题');
+        showToast('请输入笔记标题', 'error');
         return;
     }
 

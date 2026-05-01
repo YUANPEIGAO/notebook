@@ -15,18 +15,23 @@
     </div>
 
     <nav class="side-menu" id="sideMenu">
-        <h3>导航菜单</h3>
-        <ul class="menu-nav">
-            <li><a href="./index.html" class="nav-link active">🏠 功能首页</a></li>
-            <li><a href="./pages/note.html" class="nav-link">📝 笔记管理</a></li>
-            <li><a href="./pages/tools.html" class="nav-link">🛠️ 工具箱</a></li>
-        </ul>
-        <hr class="menu-divider">
-        <div class="github-info">
-            <h4>GitHub 同步状态</h4>
-            <p class="info-text">配置 GitHub 后可同步笔记到云端</p>
-            <div class="sync-status">GitHub: <span id="sync-status">未配置</span></div>
-            <button id="btn-open-settings" class="btn-link">⚙️ 前往设置</button>
+        <div class="menu-canvas-container">
+            <canvas id="menu-canvas"></canvas>
+        </div>
+        <div class="menu-content">
+            <h3>导航菜单</h3>
+            <ul class="menu-nav">
+                <li><a href="./index.html" class="nav-link active">🏠 功能首页</a></li>
+                <li><a href="./pages/note.html" class="nav-link">📝 笔记管理</a></li>
+                <li><a href="./pages/tools.html" class="nav-link">🛠️ 工具箱</a></li>
+            </ul>
+            <hr class="menu-divider">
+            <div class="github-info">
+                <h4>GitHub 同步状态</h4>
+                <p class="info-text">配置 GitHub 后可同步笔记到云端</p>
+                <div class="sync-status">GitHub: <span id="sync-status">未配置</span></div>
+                <button id="btn-open-settings" class="btn-link">⚙️ 前往设置</button>
+            </div>
         </div>
     </nav>
 
@@ -230,6 +235,7 @@
 
     <script type="module" src="./static/js/storage.js" defer></script>
     <script type="module" src="./static/js/github.js" defer></script>
+    <script type="module" src="./static/js/menu-canvas.js" defer></script>
     <script type="module" src="./static/js/index.js" defer></script>
 </body>
 </html>

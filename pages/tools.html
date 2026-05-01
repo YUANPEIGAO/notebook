@@ -16,17 +16,22 @@
     </div>
 
     <nav class="side-menu" id="sideMenu">
-        <div class="user-section">
-            <h3>🛠️ 工具箱</h3>
+        <div class="menu-canvas-container">
+            <canvas id="menu-canvas"></canvas>
         </div>
-        <hr class="menu-divider">
-        <div class="menu-nav">
-            <a href="../index.html" class="nav-link">🏠 功能首页</a>
-            <a href="./note.html" class="nav-link">📝 笔记管理</a>
-            <a href="./tools.html" class="nav-link active">🛠️ 工具箱</a>
+        <div class="menu-content">
+            <div class="user-section">
+                <h3>🛠️ 工具箱</h3>
+            </div>
+            <hr class="menu-divider">
+            <div class="menu-nav">
+                <a href="../index.html" class="nav-link">🏠 功能首页</a>
+                <a href="./note.html" class="nav-link">📝 笔记管理</a>
+                <a href="./tools.html" class="nav-link active">🛠️ 工具箱</a>
+            </div>
+            <hr class="menu-divider">
+            <button id="btn-open-api-settings" class="btn btn-secondary">⚙️ API 设置</button>
         </div>
-        <hr class="menu-divider">
-        <button id="btn-open-api-settings" class="btn btn-secondary">⚙️ API 设置</button>
     </nav>
 
     <div class="overlay" id="overlay"></div>
@@ -106,6 +111,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5"></script>
     <script type="module" src="../static/js/storage.js" defer></script>
     <script type="module" src="../static/js/github.js" defer></script>
+    <script type="module" src="../static/js/menu-canvas.js" defer></script>
     <script type="module" src="../static/js/tools.js" defer></script>
 </body>
 </html>

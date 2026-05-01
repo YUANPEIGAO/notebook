@@ -27,19 +27,19 @@ function initOcrEvents() {
 
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#3498db';
-            uploadArea.style.background = '#f8f9fa';
+            uploadArea.style.borderColor = '#00e5ff';
+            uploadArea.style.background = 'rgba(0, 229, 255, 0.1)';
         });
 
         uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#bdc3c7';
-            uploadArea.style.background = 'transparent';
+            uploadArea.style.borderColor = 'rgba(0, 229, 255, 0.3)';
+            uploadArea.style.background = 'rgba(0, 229, 255, 0.05)';
         });
 
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#bdc3c7';
-            uploadArea.style.background = 'transparent';
+            uploadArea.style.borderColor = 'rgba(0, 229, 255, 0.3)';
+            uploadArea.style.background = 'rgba(0, 229, 255, 0.05)';
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
                 handleOcrFile(e.dataTransfer.files[0]);
             }

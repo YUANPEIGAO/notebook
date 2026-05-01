@@ -19,21 +19,7 @@ export function initSyncElements(domElements) {
  * 初始化同步相关的事件监听器
  */
 export function initSyncEvents() {
-    if (elements.btnSync) {
-        elements.btnSync.addEventListener('click', syncAllNotes);
-    }
-    if (elements.btnLoad) {
-        elements.btnLoad.addEventListener('click', loadFromGitHub);
-    }
-    if (elements.btnOpenSettings) {
-        elements.btnOpenSettings.addEventListener('click', openSettings);
-    }
-    if (elements.btnCloseSettings) {
-        elements.btnCloseSettings.addEventListener('click', closeSettings);
-    }
-    if (elements.btnSaveSettings) {
-        elements.btnSaveSettings.addEventListener('click', saveGitHubSettings);
-    }
+    // 事件监听器在 note.js 中统一绑定，这里预留扩展
 }
 
 /**
