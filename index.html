@@ -168,6 +168,27 @@
             </div>
         </section>
 
+        <section class="mod-loader">
+            <h2 class="section-title">📦 Mod 加载器</h2>
+            <div class="mod-loader-content paper-texture">
+                <p>从 GitHub 仓库加载 mod 文件</p>
+                <div class="form-group">
+                    <label for="mod-repo">GitHub 仓库</label>
+                    <input type="text" id="mod-repo" placeholder="用户名/仓库名" value="YUANPEIGAO/hanhuaBiennio">
+                </div>
+                <div class="form-group">
+                    <label for="mod-branch">分支名称</label>
+                    <input type="text" id="mod-branch" placeholder="main" value="main">
+                </div>
+                <div class="form-group">
+                    <label for="mod-path">Mod 文件夹路径</label>
+                    <input type="text" id="mod-path" placeholder="mods/" value="">
+                </div>
+                <button id="btn-load-mods" class="btn btn-primary">加载 Mod</button>
+                <div id="mod-result" class="mod-result"></div>
+            </div>
+        </section>
+
         <footer class="footer">
             <p>在线笔记本 · 纯前端实现，无需服务器</p>
             <p class="footer-links">

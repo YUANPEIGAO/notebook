@@ -1,0 +1,10 @@
+- [x] Checkpoint 1: 加载状态指示器已添加，支持 spin 和 pulse 两种动画
+- [x] Checkpoint 2: 加载指示器可用于同步、加载等操作场景
+- [x] Checkpoint 3: 卡片悬停效果增强，包含上浮和发光阴影
+- [x] Checkpoint 4: 按钮点击有缩放反馈动画
+- [x] Checkpoint 5: 页面过渡动画已实现
+- [x] Checkpoint 6: 侧边栏切换动画流畅
+- [x] Checkpoint 7: 移动端触摸目标至少 44px
+- [x] Checkpoint 8: 移动端触摸反馈优化
+- [x] Checkpoint 9: 各页面设计风格统一
+- [x] Checkpoint 10: 所有动画效果流畅无卡顿
