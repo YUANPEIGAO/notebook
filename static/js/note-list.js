@@ -1,4 +1,4 @@
-import { showToast } from './utils/helpers.js';
+import { showToast, escapeHtml } from './utils/helpers.js';
 import { getCurrentNote } from './note.js';
 import { Storage } from './storage.js';
 import { GitHub } from './github.js';
@@ -51,12 +51,13 @@ export function renderNoteList() {
         const isSynced = note.synced || false;
         const syncBadge = isSynced ? '' : '<span class="sync-badge">未同步</span>';
         const isActive = getCurrentNote() && getCurrentNote().id === note.id;
+        const escapedTitle = escapeHtml(note.title);
         
         return `
             <div class="note-item ${isActive ? 'active' : ''}" data-id="${note.id}">
                 <div class="note-item-title">
                     <span class="note-icon">📝</span>
-                    <span class="note-title">${note.title}</span>
+                    <span class="note-title">${escapedTitle}</span>
                     ${syncBadge}
                 </div>
                 <div class="note-item-date">${new Date(note.updatedAt).toLocaleString('zh-CN')}</div>

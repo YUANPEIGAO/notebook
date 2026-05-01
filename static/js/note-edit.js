@@ -1,4 +1,4 @@
-import { showToast } from './utils/helpers.js';
+import { showToast, escapeHtml } from './utils/helpers.js';
 import { getCurrentNote, setCurrentNote, setEditing, getEditing } from './note.js';
 import { Storage } from './storage.js';
 import { GitHub } from './github.js';
@@ -217,15 +217,20 @@ export function renderNoteDetail() {
     } else {
         elements.noteDetail.style.display = 'block';
         elements.noteEditor.style.display = 'none';
+        
+        // 使用安全的方式渲染内容，防止 XSS
+        const title = escapeHtml(currentNote.title);
+        const content = escapeHtml(currentNote.content).replace(/\n/g, '<br>');
+        
         elements.noteDetail.innerHTML = `
             <div class="note-header">
-                <h2 class="note-title-display">${currentNote.title}</h2>
+                <h2 class="note-title-display">${title}</h2>
                 <div class="note-meta">
                     <span>创建于：${new Date(currentNote.createdAt).toLocaleString('zh-CN')}</span>
                     <span>更新于：${new Date(currentNote.updatedAt).toLocaleString('zh-CN')}</span>
                 </div>
             </div>
-            <div class="note-content-display">${currentNote.content.replace(/\n/g, '<br>')}</div>
+            <div class="note-content-display">${content}</div>
         `;
     }
     updateToolbar();

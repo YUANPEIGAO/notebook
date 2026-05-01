@@ -73,16 +73,13 @@ function updateHighlighterPosition() {
 
     if (!highlighter || !activeLink) return;
 
-    // 获取活动链接的位置
-    const linkRect = activeLink.getBoundingClientRect();
-    const sideMenu = document.getElementById('sideMenu');
-    const menuRect = sideMenu.getBoundingClientRect();
-
-    // 计算相对位置
-    const relativeTop = linkRect.top - menuRect.top;
-    const linkHeight = linkRect.height;
+    // 使用 offsetTop 计算相对位置（相对于父元素）
+    const menuContent = document.querySelector('.menu-content');
+    const linkOffsetTop = activeLink.offsetTop;
+    const linkHeight = activeLink.offsetHeight;
     
-    // 设置高亮器位置（居中对齐）
-    const highlighterTop = relativeTop + (linkHeight - 36) / 2;
+    // 计算高亮器位置（考虑 menu-content 的 padding-top）
+    const contentTop = menuContent ? parseInt(window.getComputedStyle(menuContent).paddingTop) : 80;
+    const highlighterTop = contentTop + linkOffsetTop + (linkHeight - 36) / 2;
     highlighter.style.top = highlighterTop + 'px';
 }

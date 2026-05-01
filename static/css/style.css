@@ -327,9 +327,12 @@ h4::after {
     border-right: 1px solid rgba(0, 229, 255, 0.3);
     z-index: 1000;
     transform: translateX(-100%);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: 
+        transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    position: relative;
+    opacity: 0;
 }
 
 /* Canvas 容器 */
@@ -353,7 +356,7 @@ h4::after {
 .dna-highlighter {
     position: absolute;
     left: -8px;
-    top: 20%;
+    top: 110px;
     width: 4px;
     height: 36px;
     background: linear-gradient(to bottom, #ff6b6b, #c8102e, #ff6b6b);
@@ -419,10 +422,6 @@ h4::after {
 }
 
 /* 内容区域动画 */
-.main-content {
-    animation: contentSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @keyframes contentSlideIn {
     from {
         opacity: 0;
@@ -434,14 +433,7 @@ h4::after {
     }
 }
 
-/* 侧边栏滑入动画增强 */
-.side-menu {
-    transition: 
-        transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
-}
+
 
 .side-menu.active {
     opacity: 1;
@@ -489,22 +481,31 @@ h4::after {
 /* 导航菜单样式 */
 .menu-nav {
     list-style: none;
-    margin-bottom: 20px;
+    padding: 0;
+    margin: 0 0 20px 0;
 }
 
 .menu-nav li {
-    margin: 10px 0;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
 }
 
 .nav-link {
     text-decoration: none;
     color: #e0f7fa;
     font-size: 1rem;
-    padding: 8px 10px;
-    display: block;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     border-radius: 6px;
     transition: all 0.2s ease;
     border: 1px solid transparent;
+    min-height: 44px;
+    height: 44px;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .nav-link:hover {
@@ -598,6 +599,7 @@ h4::after {
     border: 1px solid rgba(0, 229, 255, 0.2);
     min-height: 100vh;
     box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
+    animation: contentSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 响应式适配：宽屏时默认展开侧边栏 */

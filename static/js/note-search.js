@@ -1,4 +1,4 @@
-import { showToast } from './utils/helpers.js';
+import { showToast, escapeHtml } from './utils/helpers.js';
 import { Storage } from './storage.js';
 import { GitHub } from './github.js';
 
@@ -224,13 +224,17 @@ export function renderSearchResults(results) {
         return;
     }
     
-    elements.searchResults.innerHTML = results.map(result => `
-        <div class="search-result-item" data-id="${result.id}" data-source="${result.source}">
-            <span class="search-result-source">${result.source === 'local' ? '📁 本地' : '☁️ 云端'}</span>
-            <div class="search-result-title">${result.title}</div>
-            <div class="search-result-preview">${result.content.substring(0, 80)}${result.content.length > 80 ? '...' : ''}</div>
-        </div>
-    `).join('');
+    elements.searchResults.innerHTML = results.map(result => {
+        const escapedTitle = escapeHtml(result.title);
+        const preview = escapeHtml(result.content.substring(0, 80)) + (result.content.length > 80 ? '...' : '');
+        return `
+            <div class="search-result-item" data-id="${result.id}" data-source="${result.source}">
+                <span class="search-result-source">${result.source === 'local' ? '📁 本地' : '☁️ 云端'}</span>
+                <div class="search-result-title">${escapedTitle}</div>
+                <div class="search-result-preview">${preview}</div>
+            </div>
+        `;
+    }).join('');
     
     elements.searchResults.style.display = 'block';
 }
