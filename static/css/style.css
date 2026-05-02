@@ -323,16 +323,13 @@ h4::after {
     width: 280px;
     height: 100vh;
     background: rgba(8, 20, 35, 0.95);
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(15px);
     border-right: 1px solid rgba(0, 229, 255, 0.3);
     z-index: 1000;
     transform: translateX(-100%);
-    transition: 
-        transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    opacity: 0;
+    will-change: transform;
 }
 
 /* Canvas 容器 */
@@ -413,23 +410,20 @@ h4::after {
 
     .side-menu.active {
         transform: translateX(0);
-        box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
     }
 }
 
 /* 页面过渡动画 */
 .page-transition {
-    animation: pageFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: pageFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes pageFadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -617,11 +611,10 @@ h4::after {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
     z-index: 999;
     opacity: 0;
-    pointer-events: none; /* 初始不可点击 */
-    transition: opacity 0.3s ease;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
 }
 
 .overlay.active {
@@ -634,13 +627,21 @@ h4::after {
     max-width: 900px;
     margin: 0 auto;
     padding: 40px 20px;
-    transition: margin-left 0.3s ease;
-    background: rgba(5, 15, 30, 0.75);
-    backdrop-filter: blur(24px);
+    background: rgba(5, 15, 30, 0.9);
     border: 1px solid rgba(0, 229, 255, 0.2);
     min-height: 100vh;
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
-    animation: contentSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: contentSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes contentSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* 响应式适配：宽屏时默认展开侧边栏 */
@@ -650,7 +651,6 @@ h4::after {
     }
     .side-menu {
         transform: translateX(0);
-        opacity: 1;
     }
     .main-content {
         margin-left: 300px;
