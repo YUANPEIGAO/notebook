@@ -1,5 +1,5 @@
 import { initMenuEvents } from './menu.js';
-import { showToast } from './utils/helpers.js';
+import { showToast, checkGitHubConfig } from './utils/helpers.js';
 
 // 全局变量
 let currentNote = null;
@@ -135,7 +135,7 @@ async function loadModules() {
         // 加载各个模块
         const [
             { initEditElements, initEditEvents, selectNote, renderNoteDetail, updateToolbar, createNewNote, startEditing, saveCurrentNote, cancelEditing, showDeleteConfirm, closeDeleteConfirm, confirmDelete, syncCurrentNote },
-            { initListElements, initListEvents, renderNoteList, updateStats, checkGitHubConfig },
+            { initListElements, initListEvents, renderNoteList, updateStats },
             { initSearchElements, initSearchEvents },
             { initSyncElements, initSyncEvents, syncAllNotes, loadFromGitHub, openSettings, closeSettings, saveGitHubSettings }
         ] = await Promise.all([

@@ -1,6 +1,7 @@
 import { initMenuEvents } from './menu.js';
 import { GitHub } from './github.js';
-import { showToast } from './utils/helpers.js';
+import { showToast, checkGitHubConfig } from './utils/helpers.js';
+import { openSettings, closeSettings } from './note-sync.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initMenuEvents();
@@ -29,30 +30,7 @@ function initSettingsEvents() {
     }
 }
 
-function openSettings() {
-    const modal = document.getElementById('settings-modal');
-    if (!modal) return;
 
-    modal.style.display = 'flex';
-    const config = GitHub.loadConfig();
-
-    const tokenInput = document.getElementById('gh-token');
-    const ownerInput = document.getElementById('gh-owner');
-    const repoInput = document.getElementById('gh-repo');
-    const branchInput = document.getElementById('gh-branch');
-
-    if (tokenInput) tokenInput.value = config.token || '';
-    if (ownerInput) ownerInput.value = config.owner || '';
-    if (repoInput) repoInput.value = config.repo || '';
-    if (branchInput) branchInput.value = config.branch || 'main';
-}
-
-function closeSettings() {
-    const modal = document.getElementById('settings-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
 
 async function saveGitHubSettings() {
     const tokenInput = document.getElementById('gh-token');
@@ -90,13 +68,7 @@ async function saveGitHubSettings() {
     }
 }
 
-function checkGitHubConfig() {
-    const syncStatusEl = document.getElementById('sync-status');
-    if (!syncStatusEl) return;
 
-    const configured = GitHub.isConfigured();
-    syncStatusEl.textContent = configured ? '已配置' : '未配置';
-}
 
 function initModLoaderEvents() {
     const btnLoadMods = document.getElementById('btn-load-mods');

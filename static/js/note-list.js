@@ -1,7 +1,6 @@
-import { showToast, escapeHtml } from './utils/helpers.js';
+import { showToast, escapeHtml, checkGitHubConfig } from './utils/helpers.js';
 import { getCurrentNote } from './note.js';
 import { Storage } from './storage.js';
-import { GitHub } from './github.js';
 
 // 笔记列表相关功能
 
@@ -82,13 +81,5 @@ export function updateStats() {
     if (statUnsynced) statUnsynced.textContent = stats.unsynced;
 }
 
-/**
- * 检查 GitHub 配置状态
- */
-export function checkGitHubConfig() {
-    if (!elements.syncStatus) return;
-    
-    const configured = GitHub.isConfigured();
-    elements.syncStatus.textContent = configured ? '已配置' : '未配置';
-}
+
 

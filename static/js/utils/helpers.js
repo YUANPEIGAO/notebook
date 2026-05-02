@@ -39,3 +39,18 @@ export function showToast(message, type = 'success') {
         toast.className = 'toast';
     }, 3000);
 }
+
+/**
+ * 检查 GitHub 配置状态
+ * @param {HTMLElement|null} element - 状态显示元素（可选）
+ */
+export function checkGitHubConfig(element = null) {
+    const syncStatusEl = element || document.getElementById('sync-status');
+    if (!syncStatusEl) return;
+    
+    // 动态导入以避免循环依赖
+    import('../github.js').then(({ GitHub }) => {
+        const configured = GitHub.isConfigured();
+        syncStatusEl.textContent = configured ? '已配置' : '未配置';
+    });
+}
